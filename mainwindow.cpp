@@ -42,6 +42,15 @@ void MainWindow::logServerResponds(setCodeCommand code, QJsonObject joRespond)
             if (joRespond.value("id").toInt() != 0){
                 ui->teLog->insertPlainText(QString::number(joRespond.value("id").toInt())+"\n");
                 ui->teLog->insertPlainText(joRespond.value("name").toString() + "\n");
+                qDebug() << "joRespond.value(\"list_rooms_id\")" <<joRespond.value("list_rooms_id");
+                QJsonArray arr = joRespond.value("list_rooms_id").toArray();
+                qDebug() << "arr" << arr;
+                QList<QVariant> arr1 = arr.toVariantList();
+                qDebug() << "arr" << arr;
+                for (auto elem: arr1) {
+                    qDebug() << "elem" << elem;
+                    ui->teLog->insertPlainText(QString::number(elem.toInt()) + "\n");
+                }
             }
             else{
                 ui->teLog->insertPlainText("not correct login or password\n");

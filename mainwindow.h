@@ -6,6 +6,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include "chatclient.h"
+#include <QJsonArray>
+#include <QList>
 
 namespace Ui {
 class MainWindow;
