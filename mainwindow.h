@@ -3,11 +3,7 @@
 
 #include <QMainWindow>
 #include <QTcpSocket>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include "chatclient.h"
-#include <QJsonArray>
-#include <QList>
 
 namespace Ui {
 class MainWindow;
@@ -23,14 +19,15 @@ public:
     void setConnect();
 public slots:
     void logServerResponds(setCodeCommand code, QJsonObject joRespond);
-    void slotSendQueryAuth();
+    //void slotSendQueryAuth();
 private:
     Ui::MainWindow *ui;
-    chatClient * clientSocket;
+    chatClient * client;
     void fullCbxLogins();
     void fullCbxPasswords();
+    void collectDataAuth();
 signals:
-    void SendQueryAuth(QJsonObject joAuth);
+    void dataAuthCollected();
 };
 
 #endif // MAINWINDOW_H

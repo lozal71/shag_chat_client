@@ -9,10 +9,12 @@ class protocolOut: public QObject
 {
 public:
     protocolOut();
-    protocolOut(QByteArray &str);
-    QByteArray getMessageToClient();
+    //protocolOut(QJsonDocument &jdTemp);
+    QByteArray getPackage();
+    void setPackage(QJsonDocument jdParam);
 private:
-    QByteArray block;
+    QByteArray baPackage;
+//    QJsonDocument jdPackage;
 };
 
 #endif // PROTOCOLOUT_H

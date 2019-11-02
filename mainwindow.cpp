@@ -2,13 +2,14 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QDataStream>
+#include <QJsonArray>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    clientSocket = new chatClient();
+    client = new chatClient();
     setConnect();
     fullCbxLogins();
     fullCbxPasswords();
@@ -21,14 +22,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::setConnect()
 {
-
+    // клик по кнопке Авторизации - сбор данных для авторизации
     connect(ui->pbAuth, &QPushButton::clicked,
-            this,  &MainWindow::slotSendQueryAuth);
-    connect(this,  SIGNAL(SendQueryAuth(QJsonObject)),
-            clientSocket, SLOT(slotSendQuery(QJsonObject)));
-    connect(clientSocket,&chatClient::serverResponded,
+            this,  &MainWindow::collectDataAuth);
+    // данные собраны - послать запрос
+    connect(this,&MainWindow::dataAuthCollected,
+            client, &chatClient::prepareQueryAuth);
+    connect(client,&chatClient::serverResponded,
             this,&MainWindow::logServerResponds);
-    connect(clientSocket, &chatClient::sessionClosed,
+    connect(client, &chatClient::sessionClosed,
             this, &MainWindow::logServerResponds);
 }
 
@@ -84,16 +86,6 @@ void MainWindow::logServerResponds(setCodeCommand code, QJsonObject joRespond)
 //    }
 }
 
-
-void MainWindow::slotSendQueryAuth()
-{
-    QJsonObject joTemp;
-    joTemp.insert("login",ui->cbxLogins->currentText());
-    joTemp.insert("pass",ui->cbxPasswords->currentText());
-    emit SendQueryAuth(joTemp);
-}
-
-
 void MainWindow::fullCbxLogins()
 {
     ui->cbxLogins->addItem("login1");
@@ -106,6 +98,13 @@ void MainWindow::fullCbxPasswords()
     ui->cbxPasswords->addItem("pass1");
     ui->cbxPasswords->addItem("pass2");
     ui->cbxPasswords->addItem("pass3");
+}
+
+void MainWindow::collectDataAuth()
+{
+    client->setLogin(ui->cbxLogins->currentText());
+    client->setPass(ui->cbxPasswords->currentText());
+    emit dataAuthCollected();
 }
 
 
