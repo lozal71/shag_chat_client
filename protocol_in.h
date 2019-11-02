@@ -3,23 +3,26 @@
 #include <QDataStream>
 #include <QTcpSocket>
 #include <QJsonDocument>
-#include <QJsonObject>
+#include <QJsonArray>
 
-
-enum setCodeCommand {ErrorMessage, Auth, SessionClosed, NoConnect, TimeOut};
+//enum setCodeCommand {Auth};
 
 class protocolIn: public QObject
 {
 
 public:
-    //protocolIn();
-    protocolIn(QTcpSocket *socket);
-    setCodeCommand getCode();
-    QJsonObject getData();
+    protocolIn();
+    //protocolIn(QTcpSocket *socket);
+//    setCodeCommand getCode();
+//    QJsonObject getData();
+     QJsonDocument receiveJSONdoc(QTcpSocket *socket);
+    //QVariantMap getMAP();
+     bool isError();
 private:
-    setCodeCommand codeCommand;
-    QJsonObject joDataInput;
-    QJsonObject getJsonObjectIN(QTcpSocket *socket);
+//    setCodeCommand codeCommand;
+//    QJsonDocument joDataInput;
+    bool flag_error;
+   // QJsonDocument getJSONdoc(QTcpSocket *socket);
 };
 
 #endif // POROTOCOLIN_H

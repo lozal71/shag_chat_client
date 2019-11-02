@@ -5,30 +5,35 @@
 #include "protocol_in.h"
 #include "protocol_out.h"
 
-enum setKeysJSON {codecommand, jData};
-
+//enum setCodeCommand {ErrorMessage, Auth, SessionClosed, NoConnect, TimeOut};
+enum setCodeCommand {Auth = 1};
 class chatClient : public QObject
 {
     Q_OBJECT
 public:
-    chatClient();    
+    chatClient();
+    ~chatClient();
+    void connectClient();
     void prepareQueryAuth();
-    void slotSessionClose();
+    void sessionClose();
     void setLogin(QString param);
     void setPass(QString param);
 private:
     QTcpSocket * socket;
-    QJsonObject joRespond;
     QJsonDocument jdQuery;
-    setCodeCommand codeCommand;
+    QVariantMap mapRespond;
     protocolOut *out;
+    protocolIn *in;
     QString loginClient;
     QString passClient;
+    int idClient;
+    QString nameClient;
+    QVariantMap mapRoomsClient;
     void readRespond();
     void sendQuery();
 signals:
-    void sessionClosed(setCodeCommand code, QJsonObject joRespond);
-    void serverResponded(setCodeCommand code, QJsonObject joRrespond);
+    void sessionClosed(QString sParam);
+    void serverResponded(QString sParam);
 
 };
 
