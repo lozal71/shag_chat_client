@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     client = new chatClient();
-    connectUI();
+    connectClientUI();
     fullCbxLogins();
     fullCbxPasswords();
 }
@@ -18,7 +18,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::connectUI()
+void MainWindow::connectClientUI()
 {
     // клик по кнопке Авторизации - сбор данных для авторизации
     connect(ui->pbAuth, &QPushButton::clicked,

@@ -5,8 +5,8 @@
 #include "protocol_in.h"
 #include "protocol_out.h"
 
-//enum setCodeCommand {ErrorMessage, Auth, SessionClosed, NoConnect, TimeOut};
 enum setCodeCommand {Auth = 1};
+
 class chatClient : public QObject
 {
     Q_OBJECT
@@ -20,15 +20,15 @@ public:
     void setPass(QString param);
 private:
     QTcpSocket * socket;
-    QJsonDocument jdQuery;
-    QVariantMap mapRespond;
     protocolOut *out;
     protocolIn *in;
-    QString loginClient;
-    QString passClient;
-    int idClient;
-    QString nameClient;
-    QVariantMap mapRoomsClient;
+    struct clientData {
+        QString loginClient;
+        QString passClient;
+        int idClient;
+        QString nameClient;
+        QVariantMap mapRoomsClient;
+    } data;
     void readRespond();
     void sendQuery();
 signals:

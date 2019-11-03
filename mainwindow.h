@@ -16,7 +16,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void connectUI();
+    void connectClientUI();
 public slots:
     void logServerResponds(QString sParam);
     //void slotSendQueryAuth();

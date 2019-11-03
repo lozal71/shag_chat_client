@@ -6,23 +6,6 @@ protocolOut::protocolOut()
 
 }
 
-//protocolOut::protocolOut(QJsonDocument &jdTemp)
-//{
-////    QByteArray baMessage = jdTemp.toJson(QJsonDocument::Compact);
-////    //quint32 packageSize = str.length();
-////    quint32 packageSize = quint32(baMessage.length());
-////    QDataStream stream(&package, QIODevice::ReadWrite);
-////    stream << packageSize;
-////    stream << baMessage;
-
-////   QJsonObject jobject;
-////   jobject["login"] = ui->leLogin->text();
-////   jobject["commandCode"] = commandCode::auth; //для авторизации логин пароль
-////   jobject["password"]= ui->lePassword->text();
-////   QJsonDocument doc(jobject);
-////   client->sendData(doc.toJson());
-//}
-
 QByteArray protocolOut::getPackage()
 {
     return baPackage;

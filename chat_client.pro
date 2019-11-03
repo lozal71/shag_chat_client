@@ -22,14 +22,12 @@ SOURCES += \
         chatclient.cpp \
         main.cpp \
         mainwindow.cpp \
-        protocol.cpp \
         protocol_in.cpp \
         protocol_out.cpp
 
 HEADERS += \
         chatclient.h \
         mainwindow.h \
-        protocol.h \
         protocol_in.h \
         protocol_out.h
 
