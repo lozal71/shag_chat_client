@@ -16,16 +16,15 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void connectClientUI();
-public slots:
-    void logServerResponds(QString sParam);
-    //void slotSendQueryAuth();
 private:
     Ui::MainWindow *ui;
     chatClient * client;
+    void connectClientUI();
+    void logServerResponds(QString sParam);
     void fullCbxLogins();
     void fullCbxPasswords();
     void collectDataAuth();
+    void drawRooms(QVariantMap mapRooms);
 signals:
     void dataAuthCollected();
 };

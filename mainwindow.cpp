@@ -27,11 +27,13 @@ void MainWindow::connectClientUI()
     connect(this,&MainWindow::dataAuthCollected,
             client, &chatClient::prepareQueryAuth);
     // сервер ответил - выводим ответ в окно логирования
-    connect(client,&chatClient::serverResponded,
+    connect(client,&chatClient::serverRespondedLog,
             this,&MainWindow::logServerResponds);
     // сессия закрылась - выводим сообщение в окно логирования
     connect(client, &chatClient::sessionClosed,
             this, &MainWindow::logServerResponds);
+    connect(client, &chatClient::serverRespondedMap,
+            this, &MainWindow::drawRooms);
 }
 
 void MainWindow::logServerResponds(QString sParam)
@@ -60,6 +62,15 @@ void MainWindow::collectDataAuth()
     client->setLogin(ui->cbxLogins->currentText());
     client->setPass(ui->cbxPasswords->currentText());
     emit dataAuthCollected();
+}
+
+void MainWindow::drawRooms(QVariantMap mapRooms)
+{
+    QPushButton *btnRoom = new QPushButton();
+    for (const QString& roomID: mapRooms.keys()){
+        btnRoom->setText(mapRooms[roomID].toString());
+        ui->vltListRooms->addWidget(btnRoom);
+    }
 }
 
 

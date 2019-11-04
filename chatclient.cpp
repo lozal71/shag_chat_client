@@ -72,11 +72,13 @@ void chatClient::readRespond()
                         }
                     }
                 }
-                //sTemp += roomID + " - " + client.mapRooms[roomID].toString() + "\n";
+
             }
+            emit serverRespondedMap(mapData["rooms"].toMap());
         }
     }
-    emit serverResponded(sTemp);
+    emit serverRespondedLog(sTemp);
+
 }
 
 
@@ -131,7 +133,7 @@ void chatClient::sendQuery()
         }
     }
     else{
-        emit serverResponded("Problem: no connection to server \n");
+        emit serverRespondedLog("Problem: no connection to server \n");
     }
 }
 

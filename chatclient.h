@@ -34,7 +34,8 @@ private:
     void sendQuery();
 signals:
     void sessionClosed(QString sParam);
-    void serverResponded(QString sParam);
+    void serverRespondedLog(QString sParam);
+    void serverRespondedMap(QVariantMap mapRooms);
 
 };
 

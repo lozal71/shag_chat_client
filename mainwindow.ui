@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>798</width>
-    <height>389</height>
+    <height>531</height>
    </rect>
   </property>
   <property name="palette">
@@ -482,10 +485,10 @@
    <widget class="QTextEdit" name="teLog">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>260</x>
       <y>90</y>
-      <width>761</width>
-      <height>201</height>
+      <width>521</width>
+      <height>81</height>
      </rect>
     </property>
     <property name="font">
@@ -497,7 +500,7 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>270</x>
       <y>60</y>
       <width>121</width>
       <height>21</height>
@@ -567,6 +570,17 @@
     <property name="text">
      <string>pass</string>
     </property>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>70</y>
+      <width>221</width>
+      <height>371</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="vltListRooms"/>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
