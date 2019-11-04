@@ -66,11 +66,25 @@ void MainWindow::collectDataAuth()
 
 void MainWindow::drawRooms(QVariantMap mapRooms)
 {
-    QPushButton *btnRoom = new QPushButton();
+
+    qDebug() << "mapRooms" << mapRooms;
     for (const QString& roomID: mapRooms.keys()){
-        btnRoom->setText(mapRooms[roomID].toString());
-        ui->vltListRooms->addWidget(btnRoom);
+        QVariantMap mapRoomName = mapRooms[roomID].toMap();
+        for (const QString& roomName: mapRoomName.keys()) {
+            QPushButton *btnRoom = new QPushButton();
+            connect(btnRoom, &QPushButton::clicked, this, &MainWindow::roomButtonClicked);
+            roomButtonToRoomId[btnRoom] = roomID;
+            qDebug() << "roomName" << roomName;
+            btnRoom->setText(roomName);
+            ui->vltListRooms->addWidget(btnRoom);
+        }
     }
+}
+
+void MainWindow::roomButtonClicked()
+{
+    qDebug() << "clicked from room button, room id is " << roomButtonToRoomId[static_cast<QPushButton*>(sender())];
+
 }
 
 

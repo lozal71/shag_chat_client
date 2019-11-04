@@ -485,10 +485,10 @@
    <widget class="QTextEdit" name="teLog">
     <property name="geometry">
      <rect>
-      <x>260</x>
+      <x>310</x>
       <y>90</y>
-      <width>521</width>
-      <height>81</height>
+      <width>471</width>
+      <height>351</height>
      </rect>
     </property>
     <property name="font">

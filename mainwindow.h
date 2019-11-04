@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTcpSocket>
+#include <QPushButton>
 #include "chatclient.h"
 
 namespace Ui {
@@ -25,6 +26,9 @@ private:
     void fullCbxPasswords();
     void collectDataAuth();
     void drawRooms(QVariantMap mapRooms);
+    void roomButtonClicked();
+
+    QMap<QPushButton*, QString> roomButtonToRoomId;
 signals:
     void dataAuthCollected();
 };
