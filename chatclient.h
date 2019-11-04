@@ -23,12 +23,13 @@ private:
     protocolOut *out;
     protocolIn *in;
     struct clientData {
-        QString loginClient;
-        QString passClient;
-        int idClient;
-        QString nameClient;
-        QVariantMap mapRoomsClient;
-    } data;
+        QString login;
+        QString pass;
+        int id;
+        QString name;
+        QVariantMap mapRooms;
+        QVariantMap mapMessages;
+    } client;
     void readRespond();
     void sendQuery();
 signals:

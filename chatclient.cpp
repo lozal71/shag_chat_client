@@ -6,11 +6,11 @@ chatClient::chatClient()
     socket = new QTcpSocket();
     out = new protocolOut();
     in = new protocolIn();
-    data.idClient = 0;
-    data.nameClient.clear();
-    data.passClient.clear();
-    data.loginClient.clear();
-    data.mapRoomsClient.clear();
+    client.id = 0;
+    client.name.clear();
+    client.pass.clear();
+    client.login.clear();
+    client.mapRooms.clear();
     connectClient();
 }
 
@@ -47,19 +47,32 @@ void chatClient::readRespond()
         //qDebug() << "mapCommand" << mapCommand;
         QVariantMap mapData =  mapCommand["joDataInput"].toMap();
         //qDebug() << "mapData" << mapData;
-        data.idClient = mapData["id"].toInt();
-        if (data.idClient ==0){
+        client.id = mapData["id"].toInt();
+        if (client.id ==0){
              sTemp = "Problem: login or rassword is not correct";
         }
         else {
             sTemp = "Authorization is success:";
-            sTemp += " id=" + QString::number(data.idClient);
-            data.nameClient = mapData["name"].toString();
-            sTemp += " name = " + data.nameClient +"\n";
-            data.mapRoomsClient = mapData["rooms"].toMap();
-            sTemp += " rooms:";
-            for (const QString& roomID: data.mapRoomsClient.keys()){
-                sTemp += roomID + " - " + data.mapRoomsClient[roomID].toString() + "\n";
+            sTemp += " id=" + QString::number(client.id);
+            client.name = mapData["name"].toString();
+            sTemp += " name = " + client.name +"\n";
+            client.mapRooms = mapData["rooms"].toMap();
+            sTemp += "rooms: \n";
+            for (const QString& roomID: client.mapRooms.keys()){
+                QVariantMap mapRoomID = client.mapRooms[roomID].toMap();
+                sTemp += roomID + "-";
+                for (const QString& roomName: mapRoomID.keys()){
+                    sTemp +=roomName + "\n";
+                    QVariantMap mapRoomName = mapRoomID[roomName].toMap();
+                    for (const QString& timeMess: mapRoomName.keys()){
+                        sTemp += timeMess + ": ";
+                        QVariantMap mapSenderMessage = mapRoomName[timeMess].toMap();
+                        for (const QString& sender: mapSenderMessage.keys()){
+                            sTemp += sender + " " + mapSenderMessage[sender].toString() +"\n";
+                        }
+                    }
+                }
+                //sTemp += roomID + " - " + client.mapRooms[roomID].toString() + "\n";
             }
         }
     }
@@ -75,8 +88,8 @@ void chatClient::prepareQueryAuth()
     // формирование JSON- документа
     QVariantMap mapCommand;
     QVariantMap mapData;
-    mapData["login"] = data.loginClient;
-    mapData["pass"] = data.passClient;
+    mapData["login"] = client.login;
+    mapData["pass"] = client.pass;
     mapCommand["codeCommand"] = setCodeCommand::Auth;
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
@@ -95,12 +108,12 @@ void chatClient::sessionClose()
 
 void chatClient::setLogin(QString param)
 {
-    data.loginClient= param;
+    client.login= param;
 }
 
 void chatClient::setPass(QString param)
 {
-    data.passClient = param;
+    client.pass = param;
 }
 
 void chatClient::sendQuery()
