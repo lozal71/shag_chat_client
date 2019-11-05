@@ -23,13 +23,15 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         protocol_in.cpp \
-        protocol_out.cpp
+        protocol_out.cpp \
+        roombutton.cpp
 
 HEADERS += \
         chatclient.h \
         mainwindow.h \
         protocol_in.h \
-        protocol_out.h
+        protocol_out.h \
+        roombutton.h
 
 FORMS += \
         mainwindow.ui

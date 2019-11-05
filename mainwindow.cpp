@@ -67,23 +67,25 @@ void MainWindow::collectDataAuth()
 void MainWindow::drawRooms(QVariantMap mapRooms)
 {
 
-    qDebug() << "mapRooms" << mapRooms;
+    //qDebug() << "mapRooms" << mapRooms;
     for (const QString& roomID: mapRooms.keys()){
         QVariantMap mapRoomName = mapRooms[roomID].toMap();
         for (const QString& roomName: mapRoomName.keys()) {
-            QPushButton *btnRoom = new QPushButton();
-            connect(btnRoom, &QPushButton::clicked, this, &MainWindow::roomButtonClicked);
-            roomButtonToRoomId[btnRoom] = roomID;
-            qDebug() << "roomName" << roomName;
+            RoomButton *btnRoom = new RoomButton(roomID,roomName,mapRoomName[roomName].toMap());
+            //connect(btnRoom,&RoomButton::clicked,this, &MainWindow::showMessage);
+            connect (btnRoom, &RoomButton::clicked, btnRoom, &RoomButton::catchRoomClick);
+            connect(btnRoom, &RoomButton::roomClicked, this, &MainWindow::showMessage);
+            mapRoomButton[btnRoom] = btnRoom->getRoomID();
+            //qDebug() << "roomName" << btnRoom->getRoomName();
             btnRoom->setText(roomName);
             ui->vltListRooms->addWidget(btnRoom);
         }
     }
 }
 
-void MainWindow::roomButtonClicked()
+void MainWindow::showMessage(QVariantMap mapUserMess)
 {
-    qDebug() << "clicked from room button, room id is " << roomButtonToRoomId[static_cast<QPushButton*>(sender())];
+    qDebug() << "clicked from room button, room id is " << static_cast<RoomButton*>(sender())->getMapUserMess();
 
 }
 
