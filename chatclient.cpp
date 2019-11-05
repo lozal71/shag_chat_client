@@ -118,6 +118,17 @@ void chatClient::setPass(QString param)
     client.pass = param;
 }
 
+QString chatClient::getName()
+{
+    return client.name;
+}
+
+//QVariantMap chatClient::getMapMessage()
+//{
+//    return client.mapMessages;
+//}
+
+
 void chatClient::sendQuery()
 {
     // если сокет дождался соединения с сервером

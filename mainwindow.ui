@@ -486,9 +486,9 @@
     <property name="geometry">
      <rect>
       <x>310</x>
-      <y>90</y>
+      <y>130</y>
       <width>471</width>
-      <height>351</height>
+      <height>81</height>
      </rect>
     </property>
     <property name="font">
@@ -500,8 +500,8 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>270</x>
-      <y>60</y>
+      <x>310</x>
+      <y>100</y>
       <width>121</width>
       <height>21</height>
      </rect>
@@ -575,12 +575,56 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>70</y>
+      <y>230</y>
       <width>221</width>
-      <height>371</height>
+      <height>211</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="vltListRooms"/>
+   </widget>
+   <widget class="QTextEdit" name="teChat">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>230</y>
+      <width>471</width>
+      <height>161</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>50</y>
+      <width>211</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="hltNameUser"/>
+   </widget>
+   <widget class="QLineEdit" name="leWritrMes">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>410</y>
+      <width>371</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbSend">
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>410</y>
+      <width>71</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Send</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">

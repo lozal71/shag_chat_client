@@ -29,11 +29,13 @@ void MainWindow::connectClientUI()
     // сервер ответил - выводим ответ в окно логирования
     connect(client,&chatClient::serverRespondedLog,
             this,&MainWindow::logServerResponds);
+    connect(client,&chatClient::serverRespondedLog,
+            this,&MainWindow::showName);
     // сессия закрылась - выводим сообщение в окно логирования
     connect(client, &chatClient::sessionClosed,
             this, &MainWindow::logServerResponds);
     connect(client, &chatClient::serverRespondedMap,
-            this, &MainWindow::drawRooms);
+            this, &MainWindow::showRooms);
 }
 
 void MainWindow::logServerResponds(QString sParam)
@@ -64,28 +66,44 @@ void MainWindow::collectDataAuth()
     emit dataAuthCollected();
 }
 
-void MainWindow::drawRooms(QVariantMap mapRooms)
+void MainWindow::showRooms(QVariantMap mapRooms)
 {
-
     //qDebug() << "mapRooms" << mapRooms;
     for (const QString& roomID: mapRooms.keys()){
         QVariantMap mapRoomName = mapRooms[roomID].toMap();
         for (const QString& roomName: mapRoomName.keys()) {
             RoomButton *btnRoom = new RoomButton(roomID,roomName,mapRoomName[roomName].toMap());
-            //connect(btnRoom,&RoomButton::clicked,this, &MainWindow::showMessage);
-            connect (btnRoom, &RoomButton::clicked, btnRoom, &RoomButton::catchRoomClick);
-            connect(btnRoom, &RoomButton::roomClicked, this, &MainWindow::showMessage);
+            connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
             mapRoomButton[btnRoom] = btnRoom->getRoomID();
-            //qDebug() << "roomName" << btnRoom->getRoomName();
             btnRoom->setText(roomName);
             ui->vltListRooms->addWidget(btnRoom);
         }
     }
 }
 
-void MainWindow::showMessage(QVariantMap mapUserMess)
+void MainWindow::showName()
 {
-    qDebug() << "clicked from room button, room id is " << static_cast<RoomButton*>(sender())->getMapUserMess();
+    ui->pbAuth->setEnabled(false);
+    QLabel *lblName = new QLabel(client->getName());
+    ui->hltNameUser->addWidget(lblName);
+}
+
+void MainWindow::showMessage()
+{
+    ui->teChat->clear();
+    QString sTemp="";
+    QVariantMap mapTimeMess = static_cast<RoomButton*>(sender())->getMapUserMess();
+    qDebug() << "clicked from room button, room id is " << mapTimeMess;
+    for (const QString& timeMess: mapTimeMess.keys()){
+        sTemp += timeMess + ": ";
+        QVariantMap mapSenderMessage = mapTimeMess[timeMess].toMap();
+        for (const QString& sender: mapSenderMessage.keys()){
+            sTemp += "from " + sender + "\n" + mapSenderMessage[sender].toString() +"\n";
+            qDebug() <<"sTemp" << sTemp;
+            ui->teChat->insertPlainText(sTemp);
+        }
+        sTemp.clear();
+    }
 
 }
 

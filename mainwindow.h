@@ -26,8 +26,9 @@ private:
     void fullCbxLogins();
     void fullCbxPasswords();
     void collectDataAuth();
-    void drawRooms(QVariantMap mapRooms);
-    void showMessage(QVariantMap  mapUserMess);
+    void showRooms(QVariantMap mapRooms);
+    void showName();
+    void showMessage();
 
     //QMap<QPushButton*, QString> roomButtonToRoomId;
     QMap<RoomButton*, QString> mapRoomButton;

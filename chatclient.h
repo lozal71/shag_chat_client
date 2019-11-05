@@ -7,6 +7,16 @@
 
 enum setCodeCommand {Auth = 1};
 
+struct clientData {
+    QString login;
+    QString pass;
+    int id;
+    QString name;
+    QVariantMap mapRooms;
+    //QVariantMap mapMessages*/
+};
+
+
 class chatClient : public QObject
 {
     Q_OBJECT
@@ -18,18 +28,13 @@ public:
     void sessionClose();
     void setLogin(QString param);
     void setPass(QString param);
+    QString getName();
+//    QVariantMap getMapMessage();
 private:
     QTcpSocket * socket;
     protocolOut *out;
     protocolIn *in;
-    struct clientData {
-        QString login;
-        QString pass;
-        int id;
-        QString name;
-        QVariantMap mapRooms;
-        QVariantMap mapMessages;
-    } client;
+    clientData client;
     void readRespond();
     void sendQuery();
 signals:
