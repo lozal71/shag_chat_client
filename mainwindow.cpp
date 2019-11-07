@@ -18,6 +18,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
 void MainWindow::connectClientUI()
 {
     // клик по кнопке Авторизации - сбор данных для авторизации
@@ -36,6 +37,13 @@ void MainWindow::connectClientUI()
             this, &MainWindow::logServerResponds);
     connect(client, &chatClient::serverRespondedMap,
             this, &MainWindow::showRooms);
+
+    connect(ui->pbSend, &QPushButton::clicked,
+            this, &MainWindow::collectDataSend);
+
+    connect(this, &MainWindow::dataSendCollected,
+            client, &chatClient::prepareQuerySendMessage);
+
 }
 
 void MainWindow::logServerResponds(QString sParam)
@@ -66,6 +74,13 @@ void MainWindow::collectDataAuth()
     emit dataAuthCollected();
 }
 
+void MainWindow::collectDataSend()
+{
+    qDebug() << "ui->leWritrMes->text()" <<ui->leWritrMes->text() ;
+    client->setText(ui->leWritrMes->text());
+    emit dataSendCollected(roomActivID);
+}
+
 void MainWindow::showRooms(QVariantMap mapRooms)
 {
     //qDebug() << "mapRooms" << mapRooms;
@@ -93,7 +108,8 @@ void MainWindow::showMessage()
     ui->teChat->clear();
     QString sTemp="";
     QVariantMap mapTimeMess = static_cast<RoomButton*>(sender())->getMapUserMess();
-    qDebug() << "clicked from room button, room id is " << mapTimeMess;
+    roomActivID = static_cast<RoomButton*>(sender())->getRoomID().toInt();
+    qDebug() << "clicked from room button, room id is " << roomActivID;
     for (const QString& timeMess: mapTimeMess.keys()){
         sTemp += timeMess + ": ";
         QVariantMap mapSenderMessage = mapTimeMess[timeMess].toMap();

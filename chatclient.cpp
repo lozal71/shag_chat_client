@@ -103,6 +103,28 @@ void chatClient::prepareQueryAuth()
     sendQuery();
 }
 
+void chatClient::prepareQuerySendMessage(int roomID)
+{
+      // формирование JSON- документа
+    QVariantMap mapCommand;
+    QVariantMap mapData;
+    QDateTime td;
+    td = td.currentDateTime();
+    mapData["roomID"] = roomID;
+    mapData["id"] = client.id;
+    mapData["text"] = client.text;
+    mapData["time"] = td;
+    mapCommand["codeCommand"] = setCodeCommand::Send;
+    mapCommand["joDataInput"] = mapData;
+    QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
+    qDebug() << "jdQuery" << jdQuery;
+
+    // сформировать выходной пакет для отправки на сервер
+    out->setPackage(jdQuery);
+    // послать запрос
+    sendQuery();
+}
+
 void chatClient::sessionClose()
 {
     emit sessionClosed("Disconnect. Session closed \n");
@@ -116,6 +138,11 @@ void chatClient::setLogin(QString param)
 void chatClient::setPass(QString param)
 {
     client.pass = param;
+}
+
+void chatClient::setText(QString param)
+{
+    client.text = param;
 }
 
 QString chatClient::getName()

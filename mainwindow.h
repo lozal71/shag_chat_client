@@ -21,11 +21,13 @@ public:
 private:
     Ui::MainWindow *ui;
     chatClient * client;
+    int roomActivID;
     void connectClientUI();
     void logServerResponds(QString sParam);
     void fullCbxLogins();
     void fullCbxPasswords();
     void collectDataAuth();
+    void collectDataSend();
     void showRooms(QVariantMap mapRooms);
     void showName();
     void showMessage();
@@ -34,6 +36,7 @@ private:
     QMap<RoomButton*, QString> mapRoomButton;
 signals:
     void dataAuthCollected();
+    void dataSendCollected(int roomID);
 };
 
 #endif // MAINWINDOW_H
