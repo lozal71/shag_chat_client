@@ -10,7 +10,7 @@ chatClient::chatClient()
     client.name.clear();
     client.pass.clear();
     client.login.clear();
-    client.mapRooms.clear();
+    //client.mapRooms.clear();
     connectClient();
 }
 
@@ -47,38 +47,49 @@ void chatClient::readRespond()
         //qDebug() << "mapCommand" << mapCommand;
         QVariantMap mapData =  mapCommand["joDataInput"].toMap();
         //qDebug() << "mapData" << mapData;
-        client.id = mapData["id"].toInt();
-        if (client.id ==0){
-             sTemp = "Problem: login or rassword is not correct";
-        }
-        else {
-            sTemp = "Authorization is success:";
-            sTemp += " id=" + QString::number(client.id);
-            client.name = mapData["name"].toString();
-            sTemp += " name = " + client.name +"\n";
-            client.mapRooms = mapData["rooms"].toMap();
-            sTemp += "rooms: \n";
-            for (const QString& roomID: client.mapRooms.keys()){
-                QVariantMap mapRoomID = client.mapRooms[roomID].toMap();
-                sTemp += roomID + "-";
-                for (const QString& roomName: mapRoomID.keys()){
-                    sTemp +=roomName + "\n";
-                    QVariantMap mapRoomName = mapRoomID[roomName].toMap();
-                    for (const QString& timeMess: mapRoomName.keys()){
-                        sTemp += timeMess + ": ";
-                        QVariantMap mapSenderMessage = mapRoomName[timeMess].toMap();
-                        for (const QString& sender: mapSenderMessage.keys()){
-                            sTemp += sender + " " + mapSenderMessage[sender].toString() +"\n";
+        switch (setCodeCommand(mapCommand["codeCommand"].toInt())) {
+            case setCodeCommand::Auth:
+            {
+                client.id = mapData["id"].toInt();
+                if (client.id ==0){
+                     sTemp = "Problem: login or password is not correct";
+                }
+                else {
+                    sTemp = "Authorization is success:";
+                    sTemp += " id=" + QString::number(client.id);
+                    client.name = mapData["name"].toString();
+                    sTemp += " name = " + client.name;
+                    QVariantMap mapRooms = mapData["rooms"].toMap();
+                    sTemp += "rooms: ";
+                    for (const QString& roomID: mapRooms.keys()){
+                        QVariantMap mapRoomID = mapRooms[roomID].toMap();
+                        sTemp += roomID + "-";
+                        for (const QString& roomName: mapRoomID.keys()){
+                            sTemp +=roomName;
+                            QVariantMap mapRoomName = mapRoomID[roomName].toMap();
+                            for (const QString& timeMess: mapRoomName.keys()){
+                                sTemp += timeMess + ": ";
+                                QVariantMap mapSenderMessage = mapRoomName[timeMess].toMap();
+                                for (const QString& sender: mapSenderMessage.keys()){
+                                    sTemp += sender + " " + mapSenderMessage[sender].toString();
+                                }
+                            }
                         }
                     }
+                    emit serverRespondedAuth(mapData["rooms"].toMap());
                 }
-
+                break;
             }
-            emit serverRespondedMap(mapData["rooms"].toMap());
+            case setCodeCommand::Send:
+            {
+                sTemp = "sendResult " + mapData["sendResult"].toString();
+                //emit serverResponded();
+                break;
+            }
         }
     }
-    emit serverRespondedLog(sTemp);
-
+    qDebug() << sTemp;
+    //emit serverRespondedLog(sTemp);
 }
 
 
@@ -111,13 +122,14 @@ void chatClient::prepareQuerySendMessage(int roomID)
     QDateTime td;
     td = td.currentDateTime();
     mapData["roomID"] = roomID;
-    mapData["id"] = client.id;
+//    qDebug() << "client.id" << client.id;
+//    mapData["id"] =client.id;
     mapData["text"] = client.text;
     mapData["time"] = td;
     mapCommand["codeCommand"] = setCodeCommand::Send;
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
-    qDebug() << "jdQuery" << jdQuery;
+    //qDebug() << "jdQuery" << jdQuery;
 
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
@@ -171,7 +183,8 @@ void chatClient::sendQuery()
         }
     }
     else{
-        emit serverRespondedLog("Problem: no connection to server \n");
+        //emit serverRespondedLog("Problem: no connection to server \n");
+        qDebug() << "Problem: no connection to server";
     }
 }
 

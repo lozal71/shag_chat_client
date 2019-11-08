@@ -14,8 +14,6 @@ struct clientData {
     int id;
     QString name;
     QString text;
-    QVariantMap mapRooms;
-    //QVariantMap mapMessages*/
 };
 
 
@@ -43,8 +41,9 @@ private:
     void sendQuery();
 signals:
     void sessionClosed(QString sParam);
-    void serverRespondedLog(QString sParam);
-    void serverRespondedMap(QVariantMap mapRooms);
+    //void serverRespondedLog(QString sParam);
+    //void serverResponded();
+    void serverRespondedAuth(QVariantMap mapRooms);
 
 };
 

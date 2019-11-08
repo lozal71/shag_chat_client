@@ -27,20 +27,17 @@ void MainWindow::connectClientUI()
     // данные для Авторизации собраны - клиент готовит запрос на Авторизацию
     connect(this,&MainWindow::dataAuthCollected,
             client, &chatClient::prepareQueryAuth);
-    // сервер ответил - выводим ответ в окно логирования
-    connect(client,&chatClient::serverRespondedLog,
-            this,&MainWindow::logServerResponds);
-    connect(client,&chatClient::serverRespondedLog,
-            this,&MainWindow::showName);
     // сессия закрылась - выводим сообщение в окно логирования
     connect(client, &chatClient::sessionClosed,
             this, &MainWindow::logServerResponds);
-    connect(client, &chatClient::serverRespondedMap,
-            this, &MainWindow::showRooms);
-
+    // клиент сообщил, что сервер прислал ответ на авторизацию
+        // - показываем комнаты и имя пользователя
+    connect(client, &chatClient::serverRespondedAuth,
+            this, &MainWindow::showRoomsUserName);
+    // клик по кнопке-Send - собираем данные для отправки сообщения
     connect(ui->pbSend, &QPushButton::clicked,
             this, &MainWindow::collectDataSend);
-
+    // данные для отправки сообщения собраны - клиент готовит запрос - "отправка сообщения"
     connect(this, &MainWindow::dataSendCollected,
             client, &chatClient::prepareQuerySendMessage);
 
@@ -76,13 +73,20 @@ void MainWindow::collectDataAuth()
 
 void MainWindow::collectDataSend()
 {
-    qDebug() << "ui->leWritrMes->text()" <<ui->leWritrMes->text() ;
-    client->setText(ui->leWritrMes->text());
+    //qDebug() << "ui->leWritrMes->text()" <<ui->leWriteMes->text() ;
+    client->setText(ui->leWriteMes->text());
+    ui->teChat->setAlignment(Qt::AlignRight);
+    ui->teChat->insertPlainText("I say " + ui->leWriteMes->text());
+    ui->leWriteMes->clear();
+   // ui->pbSend->setEnabled(false);
     emit dataSendCollected(roomActivID);
 }
 
-void MainWindow::showRooms(QVariantMap mapRooms)
+void MainWindow::showRoomsUserName(QVariantMap mapRooms)
 {
+    ui->pbAuth->setEnabled(false);
+    QLabel *lblName = new QLabel(client->getName());
+    ui->hltNameUser->addWidget(lblName);
     //qDebug() << "mapRooms" << mapRooms;
     for (const QString& roomID: mapRooms.keys()){
         QVariantMap mapRoomName = mapRooms[roomID].toMap();
@@ -96,12 +100,13 @@ void MainWindow::showRooms(QVariantMap mapRooms)
     }
 }
 
-void MainWindow::showName()
-{
-    ui->pbAuth->setEnabled(false);
-    QLabel *lblName = new QLabel(client->getName());
-    ui->hltNameUser->addWidget(lblName);
-}
+//void MainWindow::showName()
+//{
+//    qDebug() << "showName";
+////    ui->pbAuth->setEnabled(false);
+////    QLabel *lblName = new QLabel(client->getName());
+////    ui->hltNameUser->addWidget(lblName);
+//}
 
 void MainWindow::showMessage()
 {

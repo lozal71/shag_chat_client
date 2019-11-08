@@ -486,9 +486,9 @@
     <property name="geometry">
      <rect>
       <x>310</x>
-      <y>130</y>
+      <y>100</y>
       <width>471</width>
-      <height>81</height>
+      <height>61</height>
      </rect>
     </property>
     <property name="font">
@@ -501,7 +501,7 @@
     <property name="geometry">
      <rect>
       <x>310</x>
-      <y>100</y>
+      <y>60</y>
       <width>121</width>
       <height>21</height>
      </rect>
@@ -586,9 +586,9 @@
     <property name="geometry">
      <rect>
       <x>310</x>
-      <y>230</y>
+      <y>190</y>
       <width>471</width>
-      <height>161</height>
+      <height>201</height>
      </rect>
     </property>
    </widget>
@@ -603,12 +603,12 @@
     </property>
     <layout class="QHBoxLayout" name="hltNameUser"/>
    </widget>
-   <widget class="QLineEdit" name="leWritrMes">
+   <widget class="QLineEdit" name="leWriteMes">
     <property name="geometry">
      <rect>
       <x>310</x>
       <y>410</y>
-      <width>371</width>
+      <width>351</width>
       <height>31</height>
      </rect>
     </property>

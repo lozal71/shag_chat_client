@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTcpSocket>
 #include <QPushButton>
+//#include <QLineEdit>
 #include "chatclient.h"
 #include "roombutton.h"
 
@@ -28,8 +29,8 @@ private:
     void fullCbxPasswords();
     void collectDataAuth();
     void collectDataSend();
-    void showRooms(QVariantMap mapRooms);
-    void showName();
+    void showRoomsUserName(QVariantMap mapRooms);
+    //void showName();
     void showMessage();
 
     //QMap<QPushButton*, QString> roomButtonToRoomId;
