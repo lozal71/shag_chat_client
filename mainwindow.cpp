@@ -1,9 +1,9 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+//#include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) :
+windowServer::windowServer(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::windowServer)
 {
     ui->setupUi(this);
     client = new chatClient();
@@ -12,66 +12,66 @@ MainWindow::MainWindow(QWidget *parent) :
     fullCbxPasswords();
 }
 
-MainWindow::~MainWindow()
+windowServer::~windowServer()
 {
     delete client;
     delete ui;
 }
 
 
-void MainWindow::connectClientUI()
+void windowServer::connectClientUI()
 {
     // клик по кнопке Авторизации - сбор данных для авторизации
     connect(ui->pbAuth, &QPushButton::clicked,
-            this,  &MainWindow::collectDataAuth);
+            this,  &windowServer::collectDataAuth);
     // данные для Авторизации собраны - клиент готовит запрос на Авторизацию
-    connect(this,&MainWindow::dataAuthCollected,
+    connect(this,&windowServer::dataAuthCollected,
             client, &chatClient::prepareQueryAuth);
     // сессия закрылась - выводим сообщение в окно логирования
     connect(client, &chatClient::sessionClosed,
-            this, &MainWindow::logServerResponds);
+            this, &windowServer::logServerResponds);
     // клиент сообщил, что сервер прислал ответ на авторизацию
         // - показываем комнаты и имя пользователя
     connect(client, &chatClient::serverRespondedAuth,
-            this, &MainWindow::showRoomsUserName);
+            this, &windowServer::showRoomsUserName);
     // клик по кнопке-Send - собираем данные для отправки сообщения
     connect(ui->pbSend, &QPushButton::clicked,
-            this, &MainWindow::collectDataSend);
+            this, &windowServer::collectDataSend);
     // данные для отправки сообщения собраны - клиент готовит запрос - "отправка сообщения"
-    connect(this, &MainWindow::dataSendCollected,
+    connect(this, &windowServer::dataSendCollected,
             client, &chatClient::prepareQuerySendMessage);
 
 }
 
-void MainWindow::logServerResponds(QString sParam)
+void windowServer::logServerResponds(QString sParam)
 {
 
     ui->teLog->insertPlainText("Respond from server:\n");
     ui->teLog->insertPlainText(sParam);
 }
 
-void MainWindow::fullCbxLogins()
+void windowServer::fullCbxLogins()
 {
     ui->cbxLogins->addItem("login1");
     ui->cbxLogins->addItem("login2");
     ui->cbxLogins->addItem("login3");
 }
 
-void MainWindow::fullCbxPasswords()
+void windowServer::fullCbxPasswords()
 {
     ui->cbxPasswords->addItem("pass1");
     ui->cbxPasswords->addItem("pass2");
     ui->cbxPasswords->addItem("pass3");
 }
 
-void MainWindow::collectDataAuth()
+void windowServer::collectDataAuth()
 {
     client->setLogin(ui->cbxLogins->currentText());
     client->setPass(ui->cbxPasswords->currentText());
     emit dataAuthCollected();
 }
 
-void MainWindow::collectDataSend()
+void windowServer::collectDataSend()
 {
     //qDebug() << "ui->leWritrMes->text()" <<ui->leWriteMes->text() ;
     client->setText(ui->leWriteMes->text());
@@ -82,17 +82,19 @@ void MainWindow::collectDataSend()
     emit dataSendCollected(roomActivID);
 }
 
-void MainWindow::showRoomsUserName(QVariantMap mapRooms)
+void windowServer::showRoomsUserName(QVariantMap mapRooms)
 {
+    //ui->menuBar->addMenu(client->getName());
     ui->pbAuth->setEnabled(false);
     QLabel *lblName = new QLabel(client->getName());
-    ui->hltNameUser->addWidget(lblName);
+    //ui->hltNameUser->addWidget(lblName);
+    ui->mainToolBar->addWidget(lblName);
     //qDebug() << "mapRooms" << mapRooms;
     for (const QString& roomID: mapRooms.keys()){
         QVariantMap mapRoomName = mapRooms[roomID].toMap();
         for (const QString& roomName: mapRoomName.keys()) {
             RoomButton *btnRoom = new RoomButton(roomID,roomName,mapRoomName[roomName].toMap());
-            connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
+            connect (btnRoom, &RoomButton::clicked, this, &windowServer::showMessage);
             mapRoomButton[btnRoom] = btnRoom->getRoomID();
             btnRoom->setText(roomName);
             ui->vltListRooms->addWidget(btnRoom);
@@ -108,7 +110,7 @@ void MainWindow::showRoomsUserName(QVariantMap mapRooms)
 ////    ui->hltNameUser->addWidget(lblName);
 //}
 
-void MainWindow::showMessage()
+void windowServer::showMessage()
 {
     ui->teChat->clear();
     QString sTemp="";

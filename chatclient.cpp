@@ -119,13 +119,13 @@ void chatClient::prepareQuerySendMessage(int roomID)
       // формирование JSON- документа
     QVariantMap mapCommand;
     QVariantMap mapData;
-    QDateTime td;
-    td = td.currentDateTime();
+    /*QDateTime td;
+    td = td.currentDateTime();*/
     mapData["roomID"] = roomID;
 //    qDebug() << "client.id" << client.id;
 //    mapData["id"] =client.id;
     mapData["text"] = client.text;
-    mapData["time"] = td;
+    //mapData["time"] = td;
     mapCommand["codeCommand"] = setCodeCommand::Send;
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);

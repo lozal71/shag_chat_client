@@ -9,18 +9,18 @@
 #include "roombutton.h"
 
 namespace Ui {
-class MainWindow;
+class windowServer;
 }
 
-class MainWindow : public QMainWindow
+class windowServer : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    explicit windowServer(QWidget *parent = nullptr);
+    ~windowServer();
 private:
-    Ui::MainWindow *ui;
+    Ui::windowServer *ui;
     chatClient * client;
     int roomActivID;
     void connectClientUI();
