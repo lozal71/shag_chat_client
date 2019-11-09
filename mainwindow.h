@@ -3,24 +3,23 @@
 
 #include <QMainWindow>
 #include <QTcpSocket>
-#include <QPushButton>
-//#include <QLineEdit>
 #include "chatclient.h"
 #include "roombutton.h"
+#include <QMainWindow>
 
-namespace Ui {
-class windowServer;
-}
+QT_BEGIN_NAMESPACE
+namespace Ui {class MainWindow;}
+QT_END_NAMESPACE
 
-class windowServer : public QMainWindow
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit windowServer(QWidget *parent = nullptr);
-    ~windowServer();
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
 private:
-    Ui::windowServer *ui;
+    Ui::MainWindow *ui;
     chatClient * client;
     int roomActivID;
     void connectClientUI();
@@ -34,7 +33,7 @@ private:
     void showMessage();
 
     //QMap<QPushButton*, QString> roomButtonToRoomId;
-    QMap<RoomButton*, QString> mapRoomButton;
+    QMap<RoomButton*,QString> mapRoomButton;
 signals:
     void dataAuthCollected();
     void dataSendCollected(int roomID);

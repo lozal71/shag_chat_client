@@ -1,100 +1,105 @@
 #include "mainwindow.h"
-//#include "ui_mainwindow.h"
+#include "ui_mainwindow.h"
 
-windowServer::windowServer(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::windowServer)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     client = new chatClient();
     connectClientUI();
     fullCbxLogins();
     fullCbxPasswords();
+    ui->leWriteMes->setText("Please, write this...");
 }
 
-windowServer::~windowServer()
+MainWindow::~MainWindow()
 {
     delete client;
     delete ui;
 }
 
 
-void windowServer::connectClientUI()
+void MainWindow::connectClientUI()
 {
     // клик по кнопке Авторизации - сбор данных для авторизации
     connect(ui->pbAuth, &QPushButton::clicked,
-            this,  &windowServer::collectDataAuth);
+            this,  &MainWindow::collectDataAuth);
     // данные для Авторизации собраны - клиент готовит запрос на Авторизацию
-    connect(this,&windowServer::dataAuthCollected,
+    connect(this,&MainWindow::dataAuthCollected,
             client, &chatClient::prepareQueryAuth);
     // сессия закрылась - выводим сообщение в окно логирования
     connect(client, &chatClient::sessionClosed,
-            this, &windowServer::logServerResponds);
+            this, &MainWindow::logServerResponds);
     // клиент сообщил, что сервер прислал ответ на авторизацию
         // - показываем комнаты и имя пользователя
     connect(client, &chatClient::serverRespondedAuth,
-            this, &windowServer::showRoomsUserName);
+            this, &MainWindow::showRoomsUserName);
     // клик по кнопке-Send - собираем данные для отправки сообщения
     connect(ui->pbSend, &QPushButton::clicked,
-            this, &windowServer::collectDataSend);
+            this, &MainWindow::collectDataSend);
     // данные для отправки сообщения собраны - клиент готовит запрос - "отправка сообщения"
-    connect(this, &windowServer::dataSendCollected,
+    connect(this, &MainWindow::dataSendCollected,
             client, &chatClient::prepareQuerySendMessage);
 
 }
 
-void windowServer::logServerResponds(QString sParam)
+void MainWindow::logServerResponds(QString sParam)
 {
 
     ui->teLog->insertPlainText("Respond from server:\n");
     ui->teLog->insertPlainText(sParam);
 }
 
-void windowServer::fullCbxLogins()
+void MainWindow::fullCbxLogins()
 {
     ui->cbxLogins->addItem("login1");
     ui->cbxLogins->addItem("login2");
     ui->cbxLogins->addItem("login3");
 }
 
-void windowServer::fullCbxPasswords()
+void MainWindow::fullCbxPasswords()
 {
     ui->cbxPasswords->addItem("pass1");
     ui->cbxPasswords->addItem("pass2");
     ui->cbxPasswords->addItem("pass3");
 }
 
-void windowServer::collectDataAuth()
+void MainWindow::collectDataAuth()
 {
     client->setLogin(ui->cbxLogins->currentText());
     client->setPass(ui->cbxPasswords->currentText());
     emit dataAuthCollected();
 }
 
-void windowServer::collectDataSend()
+void MainWindow::collectDataSend()
 {
     //qDebug() << "ui->leWritrMes->text()" <<ui->leWriteMes->text() ;
     client->setText(ui->leWriteMes->text());
     ui->teChat->setAlignment(Qt::AlignRight);
-    ui->teChat->insertPlainText("I say " + ui->leWriteMes->text());
+    ui->teChat->insertPlainText( ui->leWriteMes->text() +"\n");
     ui->leWriteMes->clear();
    // ui->pbSend->setEnabled(false);
     emit dataSendCollected(roomActivID);
 }
 
-void windowServer::showRoomsUserName(QVariantMap mapRooms)
+void MainWindow::showRoomsUserName(QVariantMap mapRooms)
 {
-    //ui->menuBar->addMenu(client->getName());
+    // делаем кнопку авторизации недоступной
     ui->pbAuth->setEnabled(false);
+    // создаем объект QLabel и записываем имя клиента
     QLabel *lblName = new QLabel(client->getName());
-    //ui->hltNameUser->addWidget(lblName);
+    // помещаем QLabel в mainToolBar
     ui->mainToolBar->addWidget(lblName);
     //qDebug() << "mapRooms" << mapRooms;
     for (const QString& roomID: mapRooms.keys()){
         QVariantMap mapRoomName = mapRooms[roomID].toMap();
         for (const QString& roomName: mapRoomName.keys()) {
+            // создаем кнопку-комнату
             RoomButton *btnRoom = new RoomButton(roomID,roomName,mapRoomName[roomName].toMap());
-            connect (btnRoom, &RoomButton::clicked, this, &windowServer::showMessage);
+            // клик по комнате - показываем сообщения комнаты
+            connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
+            // собираем массив кнопок-комнат
             mapRoomButton[btnRoom] = btnRoom->getRoomID();
             btnRoom->setText(roomName);
             ui->vltListRooms->addWidget(btnRoom);
@@ -102,33 +107,52 @@ void windowServer::showRoomsUserName(QVariantMap mapRooms)
     }
 }
 
-//void MainWindow::showName()
-//{
-//    qDebug() << "showName";
-////    ui->pbAuth->setEnabled(false);
-////    QLabel *lblName = new QLabel(client->getName());
-////    ui->hltNameUser->addWidget(lblName);
-//}
-
-void windowServer::showMessage()
+void MainWindow::showMessage()
 {
     ui->teChat->clear();
     QString sTemp="";
-    QVariantMap mapTimeMess = static_cast<RoomButton*>(sender())->getMapUserMess();
-    roomActivID = static_cast<RoomButton*>(sender())->getRoomID().toInt();
+    // определяем, какая кнопка нажата и считывем информацию о сообщениях в комнате
+    QVariantMap mapAllMess = static_cast<RoomButton*>(sender())->getMapUserMess();
+    // фиксируем ID активной комнаты
+    this->roomActivID = static_cast<RoomButton*>(sender())->getRoomID().toInt();
     qDebug() << "clicked from room button, room id is " << roomActivID;
-    for (const QString& timeMess: mapTimeMess.keys()){
+    // обрабатываем прочитанные сообщения
+    QVariantMap mapReadMessage = mapAllMess["read"].toMap();
+    //qDebug() << "mapReadMessage" << mapReadMessage;
+    for (const QString& timeMess: mapReadMessage.keys()){
         sTemp += timeMess + ": ";
-        QVariantMap mapSenderMessage = mapTimeMess[timeMess].toMap();
+        QVariantMap mapSenderMessage = mapReadMessage[timeMess].toMap();
         for (const QString& sender: mapSenderMessage.keys()){
-            sTemp += "from " + sender + "\n" + mapSenderMessage[sender].toString() +"\n";
-            qDebug() <<"sTemp" << sTemp;
+            ui->teChat->setAlignment(Qt::AlignCenter);
+            sTemp += "from " + sender + "\n";
             ui->teChat->insertPlainText(sTemp);
+            ui->teChat->setAlignment(Qt::AlignLeft);
+            ui->teChat->insertPlainText(mapSenderMessage[sender].toString()+"\n");
         }
         sTemp.clear();
     }
-
+    // обрабатываем непрочитанные сообщения
+    sTemp = "\n Unread \n";
+    ui->teChat->setAlignment(Qt::AlignCenter);
+    ui->teChat->insertPlainText(sTemp);
+    QVariantMap mapUnreadMessage = mapAllMess["unread"].toMap();
+    //qDebug() << "mapUnreadMessage" << mapUnreadMessage;
+    for (const QString& timeMess: mapUnreadMessage.keys()){
+        sTemp += timeMess + ": ";
+        QVariantMap mapSenderMessage = mapUnreadMessage[timeMess].toMap();
+        for (const QString& sender: mapSenderMessage.keys()){
+            ui->teChat->setAlignment(Qt::AlignCenter);
+            sTemp += "from " + sender + "\n";
+            ui->teChat->insertPlainText(sTemp);
+            ui->teChat->setAlignment(Qt::AlignLeft);
+            ui->teChat->insertPlainText(mapSenderMessage[sender].toString()+"\n");
+        }
+        sTemp.clear();
+    }
+    ui->pbSend->setEnabled(true);
 }
+
+
 
 
 

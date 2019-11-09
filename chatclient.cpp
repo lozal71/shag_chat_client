@@ -36,9 +36,9 @@ void chatClient::readRespond()
     // получаем JSON-документ из сокета
     QJsonDocument jdTemp = in->receiveJSONdoc(socket);
     //qDebug() << "jdTemp" << jdTemp;
-    QString sTemp;
+    QString sLog;
     if (in->isError()){
-        sTemp = "Problem: error massage";
+        sLog = "Problem: error massage";
     }
     else{
         QJsonObject joTemp = jdTemp.object();
@@ -52,44 +52,24 @@ void chatClient::readRespond()
             {
                 client.id = mapData["id"].toInt();
                 if (client.id ==0){
-                     sTemp = "Problem: login or password is not correct";
+                     sLog = "Problem: login or password is not correct";
                 }
                 else {
-                    sTemp = "Authorization is success:";
-                    sTemp += " id=" + QString::number(client.id);
+                    sLog = "Authorization is success:";
                     client.name = mapData["name"].toString();
-                    sTemp += " name = " + client.name;
-                    QVariantMap mapRooms = mapData["rooms"].toMap();
-                    sTemp += "rooms: ";
-                    for (const QString& roomID: mapRooms.keys()){
-                        QVariantMap mapRoomID = mapRooms[roomID].toMap();
-                        sTemp += roomID + "-";
-                        for (const QString& roomName: mapRoomID.keys()){
-                            sTemp +=roomName;
-                            QVariantMap mapRoomName = mapRoomID[roomName].toMap();
-                            for (const QString& timeMess: mapRoomName.keys()){
-                                sTemp += timeMess + ": ";
-                                QVariantMap mapSenderMessage = mapRoomName[timeMess].toMap();
-                                for (const QString& sender: mapSenderMessage.keys()){
-                                    sTemp += sender + " " + mapSenderMessage[sender].toString();
-                                }
-                            }
-                        }
-                    }
+                    //qDebug() << "mapData[\"rooms\"].toMap()" <<mapData["rooms"].toMap() ;
                     emit serverRespondedAuth(mapData["rooms"].toMap());
                 }
                 break;
             }
             case setCodeCommand::Send:
             {
-                sTemp = "sendResult " + mapData["sendResult"].toString();
-                //emit serverResponded();
+                sLog = "sendResult " + mapData["sendResult"].toString();
                 break;
             }
         }
     }
-    qDebug() << sTemp;
-    //emit serverRespondedLog(sTemp);
+    qDebug() << sLog;
 }
 
 
@@ -116,20 +96,18 @@ void chatClient::prepareQueryAuth()
 
 void chatClient::prepareQuerySendMessage(int roomID)
 {
+    if (socket->state() == QTcpSocket::UnconnectedState){
+        socket->connectToHost("127.0.0.1", 6000);
+    }
       // формирование JSON- документа
     QVariantMap mapCommand;
     QVariantMap mapData;
-    /*QDateTime td;
-    td = td.currentDateTime();*/
     mapData["roomID"] = roomID;
-//    qDebug() << "client.id" << client.id;
-//    mapData["id"] =client.id;
     mapData["text"] = client.text;
-    //mapData["time"] = td;
     mapCommand["codeCommand"] = setCodeCommand::Send;
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
-    //qDebug() << "jdQuery" << jdQuery;
+    qDebug() << "jdQuery" << jdQuery;
 
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);

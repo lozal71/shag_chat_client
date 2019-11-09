@@ -1,8 +1,9 @@
 #ifndef ROOMBUTTON_H
 #define ROOMBUTTON_H
 #include <QDebug>
-#include "ui_mainwindow.h"
+//#include "ui_mainwindow.h"
 #include <QVariantMap>
+#include <QPushButton>
 
 class RoomButton: public QPushButton
 {

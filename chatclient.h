@@ -41,8 +41,6 @@ private:
     void sendQuery();
 signals:
     void sessionClosed(QString sParam);
-    //void serverRespondedLog(QString sParam);
-    //void serverResponded();
     void serverRespondedAuth(QVariantMap mapRooms);
 
 };
