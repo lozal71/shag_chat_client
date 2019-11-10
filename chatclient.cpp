@@ -107,7 +107,7 @@ void chatClient::prepareQuerySendMessage(int roomID)
     mapCommand["codeCommand"] = setCodeCommand::Send;
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
-    qDebug() << "jdQuery" << jdQuery;
+    //qDebug() << "jdQuery" << jdQuery;
 
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
@@ -151,6 +151,7 @@ void chatClient::sendQuery()
     // если сокет дождался соединения с сервером
     if (socket->waitForConnected()){
          // запись выходного пакета в сокет
+        //qDebug() << "out->getPackage()" << out->getPackage();
         socket->write(out->getPackage());
         // ожидание ответа
         // если ответ не получен в течение 5 секунд

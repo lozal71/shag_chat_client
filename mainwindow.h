@@ -6,6 +6,7 @@
 #include "chatclient.h"
 #include "roombutton.h"
 #include <QMainWindow>
+#include <dialogauth.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {class MainWindow;}
@@ -20,6 +21,7 @@ public:
     ~MainWindow();
 private:
     Ui::MainWindow *ui;
+    DialogAuth *uiLog;
     chatClient * client;
     int roomActivID;
     void connectClientUI();
@@ -37,6 +39,10 @@ private:
 signals:
     void dataAuthCollected();
     void dataSendCollected(int roomID);
+
+private slots:
+    void on_actionAuth_triggered();
+    void on_actionQuit_triggered();
 };
 
 #endif // MAINWINDOW_H

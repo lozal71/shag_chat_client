@@ -7,10 +7,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     client = new chatClient();
+    uiLog = new DialogAuth();
     connectClientUI();
     fullCbxLogins();
     fullCbxPasswords();
-    ui->leWriteMes->setText("Please, write this...");
+    ui->leWriteMes->setStyleSheet("color: gray");
+    ui->leWriteMes->setText("Please, write here...");
+
 }
 
 MainWindow::~MainWindow()
@@ -41,8 +44,7 @@ void MainWindow::connectClientUI()
     // данные для отправки сообщения собраны - клиент готовит запрос - "отправка сообщения"
     connect(this, &MainWindow::dataSendCollected,
             client, &chatClient::prepareQuerySendMessage);
-
-}
+ }
 
 void MainWindow::logServerResponds(QString sParam)
 {
@@ -53,6 +55,7 @@ void MainWindow::logServerResponds(QString sParam)
 
 void MainWindow::fullCbxLogins()
 {
+
     ui->cbxLogins->addItem("login1");
     ui->cbxLogins->addItem("login2");
     ui->cbxLogins->addItem("login3");
@@ -75,12 +78,14 @@ void MainWindow::collectDataAuth()
 void MainWindow::collectDataSend()
 {
     //qDebug() << "ui->leWritrMes->text()" <<ui->leWriteMes->text() ;
-    client->setText(ui->leWriteMes->text());
-    ui->teChat->setAlignment(Qt::AlignRight);
-    ui->teChat->insertPlainText( ui->leWriteMes->text() +"\n");
-    ui->leWriteMes->clear();
-   // ui->pbSend->setEnabled(false);
-    emit dataSendCollected(roomActivID);
+    if (!ui->leWriteMes->text().isEmpty()){
+        client->setText(ui->leWriteMes->text());
+        ui->teChat->setAlignment(Qt::AlignRight);
+        ui->teChat->insertPlainText( ui->leWriteMes->text() +"\n");
+        ui->leWriteMes->clear();
+       // ui->pbSend->setEnabled(false);
+        emit dataSendCollected(roomActivID);
+    }
 }
 
 void MainWindow::showRoomsUserName(QVariantMap mapRooms)
@@ -135,10 +140,11 @@ void MainWindow::showMessage()
     sTemp = "\n Unread \n";
     ui->teChat->setAlignment(Qt::AlignCenter);
     ui->teChat->insertPlainText(sTemp);
+    sTemp.clear();
     QVariantMap mapUnreadMessage = mapAllMess["unread"].toMap();
     //qDebug() << "mapUnreadMessage" << mapUnreadMessage;
     for (const QString& timeMess: mapUnreadMessage.keys()){
-        sTemp += timeMess + ": ";
+        sTemp = timeMess + ": ";
         QVariantMap mapSenderMessage = mapUnreadMessage[timeMess].toMap();
         for (const QString& sender: mapSenderMessage.keys()){
             ui->teChat->setAlignment(Qt::AlignCenter);
@@ -153,6 +159,13 @@ void MainWindow::showMessage()
 }
 
 
+void MainWindow::on_actionAuth_triggered()
+{
+    collectDataAuth();
 
+}
 
-
+void MainWindow::on_actionQuit_triggered()
+{
+    QApplication::exit();
+}
