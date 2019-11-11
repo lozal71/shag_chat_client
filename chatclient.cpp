@@ -67,6 +67,12 @@ void chatClient::readRespond()
                 sLog = "sendResult " + mapData["sendResult"].toString();
                 break;
             }
+            case setCodeCommand::NewRoom:
+            {
+                sLog = "newRoomID " + mapData["newRoomID"].toString();
+                emit serverRaspondedNewRoom(mapData["newRoomID"].toInt());
+                break;
+            }
         }
     }
     qDebug() << sLog;
@@ -115,6 +121,26 @@ void chatClient::prepareQuerySendMessage(int roomID)
     sendQuery();
 }
 
+void chatClient::prepareQueryNewRoom()
+{
+    if (socket->state() == QTcpSocket::UnconnectedState){
+        socket->connectToHost("127.0.0.1", 6000);
+    }
+      // формирование JSON- документа
+    QVariantMap mapCommand;
+    QVariantMap mapData;
+    mapData["roomNew"] = client.roomNew;
+    mapCommand["codeCommand"] = setCodeCommand::NewRoom;
+    mapCommand["joDataInput"] = mapData;
+    QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
+    //qDebug() << "jdQuery" << jdQuery;
+
+    // сформировать выходной пакет для отправки на сервер
+    out->setPackage(jdQuery);
+    // послать запрос
+    sendQuery();
+}
+
 void chatClient::sessionClose()
 {
     emit sessionClosed("Disconnect. Session closed");
@@ -135,9 +161,19 @@ void chatClient::setText(QString param)
     client.text = param;
 }
 
+void chatClient::setNewRoom(QString param)
+{
+    client.roomNew = param;
+}
+
 QString chatClient::getName()
 {
     return client.name;
+}
+
+QString chatClient::getNewRoomName()
+{
+    return client.roomNew;
 }
 
 //QVariantMap chatClient::getMapMessage()

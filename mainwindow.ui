@@ -547,8 +547,13 @@
      <x>0</x>
      <y>0</y>
      <width>798</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
    </property>
    <widget class="QMenu" name="menuStart">
     <property name="font">
@@ -559,6 +564,7 @@
     <property name="title">
      <string>Tools</string>
     </property>
+    <addaction name="actionNewRoom"/>
     <addaction name="actionQuit"/>
    </widget>
    <addaction name="menuStart"/>
@@ -572,14 +578,14 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionAuth">
-   <property name="text">
-    <string>Auth</string>
-   </property>
-  </action>
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionNewRoom">
+   <property name="text">
+    <string>NewRoom</string>
    </property>
   </action>
  </widget>
