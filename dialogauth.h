@@ -19,9 +19,18 @@ class DialogAuth : public QDialog
 public:
     explicit DialogAuth(QWidget *parent = nullptr);
     ~DialogAuth();
+    QString getLogin();
+    QString getPass();
+private slots:
+    void on_buttonBox_accepted();
 
 private:
     Ui::DialogAuth *ui;
+    QString login;
+    QString pass;
+    void fullCbxLogins();
+    void fullCbxPasswords();
+
 };
 
 #endif // DIALOGAUTH_H

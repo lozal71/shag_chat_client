@@ -464,131 +464,27 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="pbAuth">
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>10</y>
-      <width>101</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>9</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Авторизация</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="teLog">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>100</y>
-      <width>471</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>60</y>
-      <width>121</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Ответ сервера</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="lbLogin">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>70</y>
-      <width>111</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>login</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cbxLogins">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>100</y>
-      <width>181</width>
-      <height>31</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cbxPasswords">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>170</y>
-      <width>181</width>
-      <height>31</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="lbPassword">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>130</y>
-      <width>41</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>pass</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>230</y>
+      <y>60</y>
       <width>221</width>
-      <height>211</height>
+      <height>381</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="vltListRooms"/>
    </widget>
    <widget class="QTextEdit" name="teChat">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>310</x>
-      <y>190</y>
+      <y>60</y>
       <width>471</width>
-      <height>201</height>
+      <height>331</height>
      </rect>
     </property>
    </widget>
@@ -618,6 +514,32 @@
      <string>Send</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>20</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Rooms</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>10</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Messages</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -625,7 +547,7 @@
      <x>0</x>
      <y>0</y>
      <width>798</width>
-     <height>30</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuStart">
@@ -635,16 +557,15 @@
      </font>
     </property>
     <property name="title">
-     <string>Start</string>
+     <string>Tools</string>
     </property>
-    <addaction name="actionAuth"/>
     <addaction name="actionQuit"/>
    </widget>
    <addaction name="menuStart"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
+    <enum>BottomToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
     <bool>false</bool>

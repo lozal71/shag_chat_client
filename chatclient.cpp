@@ -117,7 +117,7 @@ void chatClient::prepareQuerySendMessage(int roomID)
 
 void chatClient::sessionClose()
 {
-    emit sessionClosed("Disconnect. Session closed \n");
+    emit sessionClosed("Disconnect. Session closed");
 }
 
 void chatClient::setLogin(QString param)

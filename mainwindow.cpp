@@ -7,13 +7,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     client = new chatClient();
-    uiLog = new DialogAuth();
     connectClientUI();
-    fullCbxLogins();
-    fullCbxPasswords();
     ui->leWriteMes->setStyleSheet("color: gray");
     ui->leWriteMes->setText("Please, write here...");
-
+    ui->teChat->setReadOnly(true);
 }
 
 MainWindow::~MainWindow()
@@ -22,18 +19,20 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+chatClient* MainWindow::getClient()
+{
+    return client;
+}
+
 
 void MainWindow::connectClientUI()
 {
-    // клик по кнопке Авторизации - сбор данных для авторизации
-    connect(ui->pbAuth, &QPushButton::clicked,
-            this,  &MainWindow::collectDataAuth);
     // данные для Авторизации собраны - клиент готовит запрос на Авторизацию
     connect(this,&MainWindow::dataAuthCollected,
             client, &chatClient::prepareQueryAuth);
     // сессия закрылась - выводим сообщение в окно логирования
     connect(client, &chatClient::sessionClosed,
-            this, &MainWindow::logServerResponds);
+            this, &MainWindow::showWarning);
     // клиент сообщил, что сервер прислал ответ на авторизацию
         // - показываем комнаты и имя пользователя
     connect(client, &chatClient::serverRespondedAuth,
@@ -46,33 +45,11 @@ void MainWindow::connectClientUI()
             client, &chatClient::prepareQuerySendMessage);
  }
 
-void MainWindow::logServerResponds(QString sParam)
+
+void MainWindow::showWarning(QString sParam)
 {
-
-    ui->teLog->insertPlainText("Respond from server:\n");
-    ui->teLog->insertPlainText(sParam);
-}
-
-void MainWindow::fullCbxLogins()
-{
-
-    ui->cbxLogins->addItem("login1");
-    ui->cbxLogins->addItem("login2");
-    ui->cbxLogins->addItem("login3");
-}
-
-void MainWindow::fullCbxPasswords()
-{
-    ui->cbxPasswords->addItem("pass1");
-    ui->cbxPasswords->addItem("pass2");
-    ui->cbxPasswords->addItem("pass3");
-}
-
-void MainWindow::collectDataAuth()
-{
-    client->setLogin(ui->cbxLogins->currentText());
-    client->setPass(ui->cbxPasswords->currentText());
-    emit dataAuthCollected();
+    QMessageBox msbx(QMessageBox::Warning,"Warning",sParam);
+    msbx.exec();
 }
 
 void MainWindow::collectDataSend()
@@ -90,8 +67,6 @@ void MainWindow::collectDataSend()
 
 void MainWindow::showRoomsUserName(QVariantMap mapRooms)
 {
-    // делаем кнопку авторизации недоступной
-    ui->pbAuth->setEnabled(false);
     // создаем объект QLabel и записываем имя клиента
     QLabel *lblName = new QLabel(client->getName());
     // помещаем QLabel в mainToolBar
@@ -108,6 +83,7 @@ void MainWindow::showRoomsUserName(QVariantMap mapRooms)
             mapRoomButton[btnRoom] = btnRoom->getRoomID();
             btnRoom->setText(roomName);
             ui->vltListRooms->addWidget(btnRoom);
+            btnRoom->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
         }
     }
 }
@@ -117,9 +93,14 @@ void MainWindow::showMessage()
     ui->teChat->clear();
     QString sTemp="";
     // определяем, какая кнопка нажата и считывем информацию о сообщениях в комнате
-    QVariantMap mapAllMess = static_cast<RoomButton*>(sender())->getMapUserMess();
+    RoomButton *roomActiv = static_cast<RoomButton*>(sender());
+    QVariantMap mapAllMess = roomActiv->getMapUserMess();
     // фиксируем ID активной комнаты
-    this->roomActivID = static_cast<RoomButton*>(sender())->getRoomID().toInt();
+    this->roomActivID = roomActiv->getRoomID().toInt();
+    // окрашиваем комнату
+    roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
+    //roomActiv->setStyleSheet("text-color: white");
+    //roomActiv->update();
     qDebug() << "clicked from room button, room id is " << roomActivID;
     // обрабатываем прочитанные сообщения
     QVariantMap mapReadMessage = mapAllMess["read"].toMap();
@@ -141,6 +122,7 @@ void MainWindow::showMessage()
     ui->teChat->setAlignment(Qt::AlignCenter);
     ui->teChat->insertPlainText(sTemp);
     sTemp.clear();
+    ui->teChat->insertPlainText(sTemp);
     QVariantMap mapUnreadMessage = mapAllMess["unread"].toMap();
     //qDebug() << "mapUnreadMessage" << mapUnreadMessage;
     for (const QString& timeMess: mapUnreadMessage.keys()){
@@ -156,12 +138,14 @@ void MainWindow::showMessage()
         sTemp.clear();
     }
     ui->pbSend->setEnabled(true);
-}
 
-
-void MainWindow::on_actionAuth_triggered()
-{
-    collectDataAuth();
+    for (RoomButton* room: mapRoomButton.keys()) {
+        if (room->getRoomID()!=roomActiv->getRoomID()){
+            room->setStyleSheet("font: 14px; color: black; background-color: gray");
+            //room->setStyleSheet("color: black");
+            //room->update();
+        }
+    }
 
 }
 
