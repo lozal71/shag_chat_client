@@ -8,9 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     client = new chatClient();
     connectClientUI();
-    //ui->leWriteMes->setStyleSheet("color: gray");
     ui->leWriteMes->setPlaceholderText("Please, write here...");
-    //ui->leWriteMes->setText("Please, write here...");
     ui->teChat->setReadOnly(true);
 }
 
@@ -50,6 +48,9 @@ void MainWindow::connectClientUI()
 
     connect(client, &chatClient::serverRaspondedNewRoom,
             this, &MainWindow::upgradeRooms);
+
+    connect(this,&MainWindow::dataDelRoomCollected,
+            client, &chatClient::prepareQueryDelRoom);
  }
 
 
@@ -68,7 +69,7 @@ void MainWindow::collectDataSend()
         ui->teChat->insertPlainText( ui->leWriteMes->text() +"\n");
         ui->leWriteMes->clear();
        // ui->pbSend->setEnabled(false);
-        emit dataSendCollected(roomActivID);
+        emit dataSendCollected(roomActiv->getRoomID());
     }
 }
 
@@ -83,14 +84,14 @@ void MainWindow::showRoomsUserName(QVariantMap mapRooms)
         QVariantMap mapRoomName = mapRooms[roomID].toMap();
         for (const QString& roomName: mapRoomName.keys()) {
             // создаем кнопку-комнату
-            RoomButton *btnRoom = new RoomButton(roomID,roomName,mapRoomName[roomName].toMap());
+            RoomButton *btnRoom = new RoomButton(roomID.toInt(),
+                                                 roomName,
+                                                 mapRoomName[roomName].toMap());
             // клик по комнате - показываем сообщения комнаты
             connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
-            // собираем массив кнопок-комнат
-            mapRoomButton[btnRoom] = btnRoom->getRoomID();
-            btnRoom->setText(roomName);
+            // собираем список кнопок-комнат
+            listRoomButton.append(btnRoom);
             ui->vltListRooms->addWidget(btnRoom);
-            btnRoom->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
         }
     }
 }
@@ -100,13 +101,11 @@ void MainWindow::showMessage()
     ui->teChat->clear();
     QString sTemp="";
     // определяем, какая кнопка нажата и считывем информацию о сообщениях в комнате
-    RoomButton *roomActiv = static_cast<RoomButton*>(sender());
+    this->roomActiv = static_cast<RoomButton*>(sender());
     QVariantMap mapAllMess = roomActiv->getMapUserMess();
-    // фиксируем ID активной комнаты
-    this->roomActivID = roomActiv->getRoomID().toInt();
     // выделяем цветом активную комнату
-    roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
-    qDebug() << "clicked from room button, room id is " << roomActivID;
+    this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
+    qDebug() << "clicked from room button, room id is " << roomActiv->getRoomID();
     // показываем прочитанные сообщения
     QVariantMap mapReadMessage = mapAllMess["read"].toMap();
     //qDebug() << "mapReadMessage" << mapReadMessage;
@@ -144,27 +143,33 @@ void MainWindow::showMessage()
     }
     ui->pbSend->setEnabled(true);
 
-    for (RoomButton* room: mapRoomButton.keys()) {
-        if (room->getRoomID()!=roomActiv->getRoomID()){
-            room->setStyleSheet("font: 14px; color: black; background-color: gray");
+    QMutableListIterator<RoomButton*> iRoom(listRoomButton);
+    RoomButton* currRoom;
+    while (iRoom.hasNext()){
+        currRoom = iRoom.next();
+        if (currRoom->getRoomID() != roomActiv->getRoomID()){
+            currRoom->setStyleSheet("font: 14px; color: black; background-color: gray");
         }
     }
 
 }
 
-void MainWindow::upgradeRooms(int roomID)
+void MainWindow::upgradeRooms(QVariantMap mapNewRoom)
 {
-    QVariantMap mapMess;
+    QVariantMap nullMapMess;
     // создаем кнопку-комнату
-    RoomButton *btnRoom = new RoomButton(QString::number(roomID),client->getNewRoomName(),mapMess);
+    RoomButton *btnRoom = new RoomButton(mapNewRoom["newRoomID"].toInt(),
+                                         mapNewRoom["newRoomName"].toString(),
+                                         nullMapMess);
     // клик по комнате - показываем сообщения комнаты
     connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
-    mapRoomButton[btnRoom] = btnRoom->getRoomID();
-    for (RoomButton* room: mapRoomButton.keys()) {
-        room->setText(room->getRoomName());
-        ui->vltListRooms->addWidget(btnRoom);
-        btnRoom->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-     }
+    listRoomButton.append(btnRoom);
+    QMutableListIterator<RoomButton*> iRoom(listRoomButton);
+    RoomButton* currRoom;
+    while (iRoom.hasNext()){
+        currRoom = iRoom.next();
+        ui->vltListRooms->addWidget(currRoom);
+    }
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -175,11 +180,31 @@ void MainWindow::on_actionQuit_triggered()
 void MainWindow::on_actionNewRoom_triggered()
 {
     bool ok;
-    QString roomName = QInputDialog::getText(this,"Name of room", "Input name here", QLineEdit::Normal, "", &ok);
+    QString roomName = QInputDialog::getText(this,"New Room",
+                                             "Name of room",
+                                             QLineEdit::Normal, "Input name here", &ok);
     if (ok && !roomName.isEmpty()){
-        client->setNewRoom(roomName);
-        emit dataNewRoomCollected();
+        emit dataNewRoomCollected(roomName);
         qDebug() << "roomName" << roomName;
     }
 
+}
+
+void MainWindow::on_actionAuth_triggered()
+{
+    DialogAuth *uiLog = new DialogAuth();
+    if(uiLog->exec() == QDialog::Accepted){
+        client->setLogin(uiLog->getLogin());
+        client->setPass(uiLog->getPass());
+        emit dataAuthCollected();
+    }
+}
+
+void MainWindow::on_actionDeleteRoom_triggered()
+{
+    QString sTemp = "Delete room " + roomActiv->getRoomName() + " ?";
+    QMessageBox quest(QMessageBox::Question,"Question",sTemp);
+    if(quest.exec()) {
+        emit dataDelRoomCollected(roomActiv->getRoomID());
+    }
 }

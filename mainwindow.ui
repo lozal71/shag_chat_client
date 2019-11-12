@@ -564,7 +564,9 @@
     <property name="title">
      <string>Tools</string>
     </property>
+    <addaction name="actionAuth"/>
     <addaction name="actionNewRoom"/>
+    <addaction name="actionDeleteRoom"/>
     <addaction name="actionQuit"/>
    </widget>
    <addaction name="menuStart"/>
@@ -586,6 +588,16 @@
   <action name="actionNewRoom">
    <property name="text">
     <string>NewRoom</string>
+   </property>
+  </action>
+  <action name="actionAuth">
+   <property name="text">
+    <string>Auth</string>
+   </property>
+  </action>
+  <action name="actionDeleteRoom">
+   <property name="text">
+    <string>DeleteRoom</string>
    </property>
   </action>
  </widget>

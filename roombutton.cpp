@@ -5,14 +5,16 @@ RoomButton::RoomButton()
 
 }
 
-RoomButton::RoomButton(QString sID, QString sName, QVariantMap mapUserMess)
+RoomButton::RoomButton(int ID, QString sName, QVariantMap mapUserMess)
 {
-    room.id = sID;
+    room.id = ID;
     room.name = sName;
     room.mapMess = mapUserMess;
+    setText(sName);
+    setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 }
 
-QString RoomButton::getRoomID()
+int RoomButton::getRoomID()
 {
     return room.id;
 }

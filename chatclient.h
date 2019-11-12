@@ -6,7 +6,7 @@
 #include "protocol_out.h"
 #include <QDateTime>
 
-enum setCodeCommand {Auth = 1, Send = 2, NewRoom = 3};
+enum setCodeCommand {Auth = 1, Send = 2, NewRoom = 3, DelRoom = 4};
 
 struct clientData {
     QString login;
@@ -14,7 +14,6 @@ struct clientData {
     int id;
     QString name;
     QString text;
-    QString roomNew;
 };
 
 
@@ -27,15 +26,14 @@ public:
     void connectClient();
     void prepareQueryAuth();
     void prepareQuerySendMessage(int roomID);
-    void prepareQueryNewRoom();
+    void prepareQueryNewRoom(QString newRoomName);
+    void prepareQueryDelRoom(int delRoomID);
     void sessionClose();
     void setLogin(QString param);
     void setPass(QString param);
     void setText(QString param);
-    void setNewRoom(QString param);
+    void setRoomActivName(QString param);
     QString getName();
-    QString getNewRoomName();
-//    QVariantMap getMapMessage();
 private:
     QTcpSocket * socket;
     protocolOut *out;
@@ -46,7 +44,7 @@ private:
 signals:
     void sessionClosed(QString sParam);
     void serverRespondedAuth(QVariantMap mapRooms);
-    void serverRaspondedNewRoom(int roomID);
+    void serverRaspondedNewRoom(QVariantMap mapNewRoom);
 };
 
 #endif // CHATCLIENT_H

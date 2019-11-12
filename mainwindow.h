@@ -9,6 +9,7 @@
 #include <dialogauth.h>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QList>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {class MainWindow;}
@@ -25,8 +26,9 @@ public:
 private:
     Ui::MainWindow *ui;
     chatClient * client;
-    int roomActivID;
-    QMap<RoomButton*,QString> mapRoomButton;
+    //int roomActivID;
+    RoomButton* roomActiv;
+    QList<RoomButton*> listRoomButton;
 
     void connectClientUI();
     void showWarning(QString sParam);
@@ -34,15 +36,17 @@ private:
     void collectDataSend();
     void showRoomsUserName(QVariantMap mapRooms);
     void showMessage();
-    void upgradeRooms(int roomID);
+    void upgradeRooms(QVariantMap mapNewRoom);
 signals:
     void dataAuthCollected();
     void dataSendCollected(int roomID);
-    void dataNewRoomCollected();
-
+    void dataNewRoomCollected(QString newRoomName);
+    void dataDelRoomCollected(int delRoomID);
 private slots:
     void on_actionQuit_triggered();
     void on_actionNewRoom_triggered();
+    void on_actionAuth_triggered();
+    void on_actionDeleteRoom_triggered();
 };
 
 #endif // MAINWINDOW_H
