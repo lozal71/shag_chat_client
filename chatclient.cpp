@@ -64,7 +64,7 @@ void chatClient::readRespond()
             }
             case setCodeCommand::Send:
             {
-                sLog = "sendResult " + mapData["sendResult"].toString();
+                sLog = "sendResult " + mapData["roomID"].toString();
                 break;
             }
             case setCodeCommand::NewRoom:
@@ -80,7 +80,13 @@ void chatClient::readRespond()
                 emit serverDeletedRoom( mapData["delRoomID"].toInt());
                 break;
             }
-            case setCodeCommand::Cast:
+            case setCodeCommand::CastDelRoom:
+            {
+                qDebug() << "mapData" << mapData;
+                emit serverCastDelRoom(mapData);
+                break;
+            }
+            case setCodeCommand::CastMess:
             {
                 qDebug() << "mapData" << mapData;
                 emit serverCast(mapData);
@@ -219,6 +225,7 @@ void chatClient::sendQuery()
     else{
         //emit serverRespondedLog("Problem: no connection to server \n");
         qDebug() << "Problem: no connection to server";
+        emit noConnect("Problem: no connection to server");
     }
 }
 

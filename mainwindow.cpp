@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     connectClientUI();
     ui->leWriteMes->setPlaceholderText("Please, write here...");
     ui->teChat->setReadOnly(true);
+    ui->actionAuth->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -32,6 +33,8 @@ void MainWindow::connectClientUI()
     // сессия закрылась - выводим сообщение в окно логирования
     connect(client, &chatClient::sessionClosed,
             this, &MainWindow::showWarning);
+    connect(client, &chatClient::noConnect,
+            this,&MainWindow::showWarning);
     // клиент сообщил, что сервер прислал ответ на авторизацию
         // - показываем комнаты и имя пользователя
     connect(client, &chatClient::serverRespondedAuth,
@@ -52,6 +55,9 @@ void MainWindow::connectClientUI()
     connect(this,&MainWindow::dataDelRoomCollected,
             client, &chatClient::prepareQueryDelRoom);
 
+    connect(client, &chatClient::serverCastDelRoom,
+            this, &MainWindow::showCastDelRoom);
+
     connect(client, &chatClient::serverCast,
             this, &MainWindow::showCast);
 
@@ -64,6 +70,7 @@ void MainWindow::showWarning(QString sParam)
 {
     QMessageBox msbx(QMessageBox::Warning,"Warning",sParam);
     msbx.exec();
+    ui->actionAuth->setEnabled(true);
 }
 
 void MainWindow::collectDataSend()
@@ -81,6 +88,7 @@ void MainWindow::collectDataSend()
 
 void MainWindow::showRoomsUserName(QVariantMap mapRole)
 {
+    ui->actionAuth->setEnabled(false);
     // создаем объект QLabel и записываем имя клиента
     QLabel *lblName = new QLabel(client->getName());
     // помещаем QLabel в mainToolBar
@@ -111,6 +119,10 @@ void MainWindow::showRoomsUserName(QVariantMap mapRole)
                     // собираем список кнопок-комнат
                     listRoomButton.append(btnRoom);
                     ui->vltListRooms->addWidget(btnRoom);
+                    if (btnRoom->getRoomID() == 1){
+                        this->roomActiv = btnRoom;
+                        this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
+                    }
                 }
 
             }
@@ -120,6 +132,7 @@ void MainWindow::showRoomsUserName(QVariantMap mapRole)
 
 void MainWindow::showMessage()
 {
+    ui->pbSend->setEnabled(true);
     ui->teChat->clear();
     QString sTemp="";
     // определяем, какая кнопка нажата и считывем информацию о сообщениях в комнате
@@ -144,26 +157,53 @@ void MainWindow::showMessage()
         sTemp.clear();
     }
     // показываем непрочитанные сообщения
-    sTemp = "\n Unread \n";
-    ui->teChat->setAlignment(Qt::AlignCenter);
-    ui->teChat->insertPlainText(sTemp);
-    sTemp.clear();
-    ui->teChat->insertPlainText(sTemp);
     QVariantMap mapUnreadMessage = mapAllMess["unread"].toMap();
-    //qDebug() << "mapUnreadMessage" << mapUnreadMessage;
-    for (const QString& timeMess: mapUnreadMessage.keys()){
-        sTemp = timeMess + ": ";
-        QVariantMap mapSenderMessage = mapUnreadMessage[timeMess].toMap();
-        for (const QString& sender: mapSenderMessage.keys()){
-            ui->teChat->setAlignment(Qt::AlignCenter);
-            sTemp += "from " + sender + "\n";
-            ui->teChat->insertPlainText(sTemp);
-            ui->teChat->setAlignment(Qt::AlignLeft);
-            ui->teChat->insertPlainText(mapSenderMessage[sender].toString()+"\n");
-        }
+    if (!mapUnreadMessage.isEmpty()){
+        sTemp = "\n Unread \n";
+        ui->teChat->setAlignment(Qt::AlignCenter);
+        ui->teChat->insertPlainText(sTemp);
         sTemp.clear();
+        ui->teChat->insertPlainText(sTemp);
+
+        //qDebug() << "mapUnreadMessage" << mapUnreadMessage;
+        for (const QString& timeMess: mapUnreadMessage.keys()){
+            sTemp = timeMess + ": ";
+            QVariantMap mapSenderMessage = mapUnreadMessage[timeMess].toMap();
+            for (const QString& sender: mapSenderMessage.keys()){
+                ui->teChat->setAlignment(Qt::AlignCenter);
+                sTemp += "from " + sender + "\n";
+                ui->teChat->insertPlainText(sTemp);
+                ui->teChat->setAlignment(Qt::AlignLeft);
+                ui->teChat->insertPlainText(mapSenderMessage[sender].toString()+"\n");
+            }
+            mapReadMessage[timeMess] = mapSenderMessage;
+            sTemp.clear();
+        }
     }
-    ui->pbSend->setEnabled(true);
+    QVariantMap mapCastMessage = mapAllMess["cast"].toMap();
+    if (!mapCastMessage.isEmpty()){
+        // показываем рассылку
+        sTemp = "\n Cast \n";
+        ui->teChat->setAlignment(Qt::AlignCenter);
+        ui->teChat->insertPlainText(sTemp);
+        sTemp.clear();
+        ui->teChat->insertPlainText(sTemp);
+
+        //qDebug() << "mapUnreadMessage" << mapUnreadMessage;
+        for (const QString& timeMess: mapCastMessage.keys()){
+            sTemp = timeMess + ": ";
+            QVariantMap mapSenderMessage = mapCastMessage[timeMess].toMap();
+            for (const QString& sender: mapSenderMessage.keys()){
+                ui->teChat->setAlignment(Qt::AlignCenter);
+                sTemp += "from " + sender + "\n";
+                ui->teChat->insertPlainText(sTemp);
+                ui->teChat->setAlignment(Qt::AlignLeft);
+                ui->teChat->insertPlainText(mapSenderMessage[sender].toString()+"\n");
+            }
+            mapReadMessage[timeMess] = mapSenderMessage;
+            sTemp.clear();
+        }
+    }
 
     QMutableListIterator<RoomButton*> iRoom(listRoomButton);
     RoomButton* currRoom;
@@ -176,15 +216,10 @@ void MainWindow::showMessage()
 
 }
 
-void MainWindow::showCast(QVariantMap mapData)
+void MainWindow::showCastDelRoom(QVariantMap mapData)
 {
     QMutableListIterator<RoomButton*> iRoom(listRoomButton);
     RoomButton* currRoom;
-    while (iRoom.hasNext()){
-        currRoom = iRoom.next();
-        qDebug() << currRoom->getRoomID() << ",";
-    }
-    iRoom.toFront();
     while (iRoom.hasNext()){
         currRoom = iRoom.next();
         if (currRoom->getRoomID() == 1 ) {
@@ -196,25 +231,48 @@ void MainWindow::showCast(QVariantMap mapData)
             ui->teChat->insertPlainText(sTemp);
             ui->teChat->setAlignment(Qt::AlignLeft);
             ui->teChat->insertPlainText(mapData["cast"].toString());
-        }
-        else {
-            if (currRoom->getRoomID() == mapData["delRoomID"].toInt() ){
-                qDebug() << "remove room ";
-                ui->vltListRooms->removeWidget(currRoom);
-                ui->vltListRooms->update();
-                qDebug() << "listRoomButton" << listRoomButton;
-                iRoom.remove();
-                qDebug() << "listRoomButton" << listRoomButton;
-            }
-            else {
-                currRoom->setStyleSheet("font: 14px; color: black; background-color: gray");
-            }
+            break;
         }
     }
     iRoom.toFront();
     while (iRoom.hasNext()){
+         currRoom = iRoom.next();
+        if (currRoom->getRoomID() == mapData["delRoomID"].toInt() ){
+            //qDebug() << "remove room ";
+            ui->vltListRooms->removeWidget(currRoom);
+            ui->vltListRooms->update();
+            //qDebug() << "listRoomButton" << listRoomButton;
+            iRoom.remove();
+            delete currRoom;
+            //qDebug() << "listRoomButton" << listRoomButton;
+            break;
+        }
+    }
+
+    iRoom.toFront();
+    while (iRoom.hasNext()){
         currRoom = iRoom.next();
-        qDebug() << currRoom->getRoomID() << ",";
+        if (currRoom->getRoomID() != 1 ) {
+            currRoom->setStyleSheet("font: 14px; color: black; background-color: gray");
+        }
+    }
+}
+
+void MainWindow::showCast(QVariantMap mapData)
+{
+    int roomID = mapData["roomID"].toInt();
+    QVariantMap newMapMess;
+    QMutableListIterator<RoomButton*> iRoom(listRoomButton);
+    RoomButton* currRoom;
+    while (iRoom.hasNext()){
+        currRoom = iRoom.next();
+        if (currRoom->getRoomID() == roomID ) {
+            currRoom->setStyleSheet("font: 14px; color: white; background-color: green");
+            newMapMess = currRoom->getMapUserMess();
+            newMapMess["cast"] = mapData["cast"].toMap();
+            currRoom->setMapMess(newMapMess);
+            break;
+        }
     }
 }
 
@@ -235,32 +293,44 @@ void MainWindow::delRoom(int delRoomID)
 {
     QMutableListIterator<RoomButton*> iRoom(listRoomButton);
     RoomButton* currRoom;
-    while (iRoom.hasNext()){
-        currRoom = iRoom.next();
-        qDebug() << currRoom->getRoomID() << ",";
-    }
-    iRoom.toFront();
+//    while (iRoom.hasNext()){
+//        currRoom = iRoom.next();
+//        qDebug() << currRoom->getRoomID() << ",";
+//    }
+//    iRoom.toFront();
     while (iRoom.hasNext()){
         currRoom = iRoom.next();
         if (currRoom->getRoomID() == 1){
             roomActiv = currRoom;
             this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
-        }
-        if (currRoom->getRoomID() == delRoomID) {
-            ui->vltListRooms->removeWidget(currRoom);
-            qDebug() << "listRoomButton" << listRoomButton;
-            iRoom.remove();
-            qDebug() << "listRoomButton" << listRoomButton;
-        }
-        else{
-            currRoom->setStyleSheet("font: 14px; color: black; background-color: gray");
+            break;
         }
     }
     iRoom.toFront();
     while (iRoom.hasNext()){
         currRoom = iRoom.next();
-        qDebug() << currRoom->getRoomID() << ",";
+        if (currRoom->getRoomID() == delRoomID) {
+            ui->vltListRooms->removeWidget(currRoom);
+           // qDebug() << "listRoomButton" << listRoomButton;
+            iRoom.remove();
+            delete currRoom;
+           // qDebug() << "listRoomButton" << listRoomButton;
+            break;
+        }
     }
+
+    iRoom.toFront();
+    while (iRoom.hasNext()){
+        currRoom = iRoom.next();
+        if (currRoom->getRoomID() != 1){
+            currRoom->setStyleSheet("font: 14px; color: black; background-color: gray");
+        }
+    }
+//    iRoom.toFront();
+//    while (iRoom.hasNext()){
+//        currRoom = iRoom.next();
+//        qDebug() << currRoom->getRoomID() << ",";
+//    }
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -285,6 +355,15 @@ void MainWindow::on_actionAuth_triggered()
 {
     DialogAuth *uiLog = new DialogAuth();
     if(uiLog->exec() == QDialog::Accepted){
+        QMutableListIterator<RoomButton*> iRoom(listRoomButton);
+        RoomButton* currRoom;
+        while (iRoom.hasNext()){
+            currRoom = iRoom.next();
+            ui->vltListRooms->removeWidget(currRoom);
+            iRoom.remove();
+           delete currRoom;
+        }
+        ui->mainToolBar->clear();
         client->setLogin(uiLog->getLogin());
         client->setPass(uiLog->getPass());
         emit dataAuthCollected();

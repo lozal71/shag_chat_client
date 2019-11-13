@@ -36,6 +36,7 @@ private:
     void collectDataSend();
     void showRoomsUserName(QVariantMap mapRole);
     void showMessage();
+    void showCastDelRoom(QVariantMap mapData);
     void showCast(QVariantMap mapData);
     void upgradeRooms(QVariantMap mapNewRoom);
     void delRoom(int delRoomID);

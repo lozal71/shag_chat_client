@@ -14,6 +14,7 @@ public:
     QString getRoomName();
     QVariantMap getMapUserMess();
     void catchRoomClick();
+    void setMapMess(QVariantMap mapParam);
 private:
     struct roomData {
         int id;

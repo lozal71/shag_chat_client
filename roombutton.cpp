@@ -39,3 +39,8 @@ void RoomButton::catchRoomClick()
 {
     emit roomClicked(room.mapMess);
 }
+
+void RoomButton::setMapMess(QVariantMap mapParam)
+{
+    room.mapMess = mapParam;
+}
