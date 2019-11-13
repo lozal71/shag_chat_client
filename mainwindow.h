@@ -38,7 +38,7 @@ private:
     void showMessage();
     void showCast(QVariantMap mapData);
     void upgradeRooms(QVariantMap mapNewRoom);
-    void delRoom();
+    void delRoom(int delRoomID);
 signals:
     void dataAuthCollected();
     void dataSendCollected(int roomID);

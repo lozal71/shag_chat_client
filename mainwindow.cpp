@@ -54,6 +54,9 @@ void MainWindow::connectClientUI()
 
     connect(client, &chatClient::serverCast,
             this, &MainWindow::showCast);
+
+    connect(client, &chatClient::serverDeletedRoom,
+            this, &MainWindow::delRoom);
  }
 
 
@@ -179,18 +182,40 @@ void MainWindow::showCast(QVariantMap mapData)
     RoomButton* currRoom;
     while (iRoom.hasNext()){
         currRoom = iRoom.next();
+        qDebug() << currRoom->getRoomID() << ",";
+    }
+    iRoom.toFront();
+    while (iRoom.hasNext()){
+        currRoom = iRoom.next();
         if (currRoom->getRoomID() == 1 ) {
-            break;
+            this->roomActiv = currRoom;
+            this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
+            QString sTemp;
+            ui->teChat->setAlignment(Qt::AlignCenter);
+            sTemp = "from server cast \n";
+            ui->teChat->insertPlainText(sTemp);
+            ui->teChat->setAlignment(Qt::AlignLeft);
+            ui->teChat->insertPlainText(mapData["cast"].toString());
+        }
+        else {
+            if (currRoom->getRoomID() == mapData["delRoomID"].toInt() ){
+                qDebug() << "remove room ";
+                ui->vltListRooms->removeWidget(currRoom);
+                ui->vltListRooms->update();
+                qDebug() << "listRoomButton" << listRoomButton;
+                iRoom.remove();
+                qDebug() << "listRoomButton" << listRoomButton;
+            }
+            else {
+                currRoom->setStyleSheet("font: 14px; color: black; background-color: gray");
+            }
         }
     }
-    this->roomActiv = currRoom;
-    this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
-    QString sTemp;
-    ui->teChat->setAlignment(Qt::AlignCenter);
-    sTemp = "from server cast \n";
-    ui->teChat->insertPlainText(sTemp);
-    ui->teChat->setAlignment(Qt::AlignLeft);
-    ui->teChat->insertPlainText(mapData["joDataInput"].toString());
+    iRoom.toFront();
+    while (iRoom.hasNext()){
+        currRoom = iRoom.next();
+        qDebug() << currRoom->getRoomID() << ",";
+    }
 }
 
 void MainWindow::upgradeRooms(QVariantMap mapNewRoom)
@@ -203,11 +228,38 @@ void MainWindow::upgradeRooms(QVariantMap mapNewRoom)
     // клик по комнате - показываем сообщения комнаты
     connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
     listRoomButton.append(btnRoom);
+    ui->vltListRooms->addWidget(btnRoom);
+}
+
+void MainWindow::delRoom(int delRoomID)
+{
     QMutableListIterator<RoomButton*> iRoom(listRoomButton);
     RoomButton* currRoom;
     while (iRoom.hasNext()){
         currRoom = iRoom.next();
-        ui->vltListRooms->addWidget(currRoom);
+        qDebug() << currRoom->getRoomID() << ",";
+    }
+    iRoom.toFront();
+    while (iRoom.hasNext()){
+        currRoom = iRoom.next();
+        if (currRoom->getRoomID() == 1){
+            roomActiv = currRoom;
+            this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
+        }
+        if (currRoom->getRoomID() == delRoomID) {
+            ui->vltListRooms->removeWidget(currRoom);
+            qDebug() << "listRoomButton" << listRoomButton;
+            iRoom.remove();
+            qDebug() << "listRoomButton" << listRoomButton;
+        }
+        else{
+            currRoom->setStyleSheet("font: 14px; color: black; background-color: gray");
+        }
+    }
+    iRoom.toFront();
+    while (iRoom.hasNext()){
+        currRoom = iRoom.next();
+        qDebug() << currRoom->getRoomID() << ",";
     }
 }
 

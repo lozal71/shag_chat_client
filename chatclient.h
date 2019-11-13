@@ -46,7 +46,7 @@ signals:
     void serverRespondedAuth(QVariantMap mapRooms);
     void serverRaspondedNewRoom(QVariantMap mapNewRoom);
     void serverCast(QVariantMap mapData);
-    void serverDeletedRoom();
+    void serverDeletedRoom(int delRoomID);
 };
 
 #endif // CHATCLIENT_H
