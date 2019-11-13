@@ -18,6 +18,7 @@ protocolIn::protocolIn(){
         quint32 baBufferLength = 0; // размер буфера
         qint64 bytesInSocket = 0;  // число байтов в сокете
         QByteArray baBuffer;
+        baBuffer.clear();
         baBuffer = socket->read(4); // считываем 4 байта
         QDataStream stream(baBuffer); // назначаем baBuffer получателем данных стрима
         stream >> packageSize; // считываем размер пришедшего сообщения

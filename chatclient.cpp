@@ -35,7 +35,7 @@ void chatClient::readRespond()
 {
     // получаем JSON-документ из сокета
     QJsonDocument jdTemp = in->receiveJSONdoc(socket);
-    //qDebug() << "jdTemp" << jdTemp;
+    qDebug() << "jdTemp" << jdTemp;
     QString sLog;
     if (in->isError()){
         sLog = "Problem: error massage";
@@ -82,13 +82,13 @@ void chatClient::readRespond()
             }
             case setCodeCommand::CastDelRoom:
             {
-                qDebug() << "mapData" << mapData;
+                //qDebug() << "mapData" << mapData;
                 emit serverCastDelRoom(mapData);
                 break;
             }
             case setCodeCommand::CastMess:
             {
-                qDebug() << "mapData" << mapData;
+                //qDebug() << "91 mapData" << mapData;
                 emit serverCast(mapData);
                 break;
             }
@@ -132,7 +132,7 @@ void chatClient::prepareQuerySendMessage(int roomID)
     mapCommand["codeCommand"] = setCodeCommand::Send;
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
-    //qDebug() << "jdQuery" << jdQuery;
+    qDebug() << "jdQuery" << jdQuery;
 
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
