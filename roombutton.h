@@ -8,15 +8,16 @@ class RoomButton: public QPushButton
 {
     Q_OBJECT
 public:
-    RoomButton();
-    RoomButton(int sID, QString sName, QVariantMap mapUserMess);
+    RoomButton(int ID, int role, QString sName, QVariantMap mapUserMess);
     int getRoomID();
+    int getRole();
     QString getRoomName();
     QVariantMap getMapUserMess();
     void catchRoomClick();
 private:
     struct roomData {
         int id;
+        int role;
         QString name;
         QVariantMap mapMess;
     } room;

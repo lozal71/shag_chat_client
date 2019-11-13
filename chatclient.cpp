@@ -74,6 +74,17 @@ void chatClient::readRespond()
                 emit serverRaspondedNewRoom(mapData);
                 break;
             }
+            case setCodeCommand::DelRoom:
+            {
+                sLog = "delResult " + mapData["delResult"].toString();
+                emit serverDeletedRoom();
+                break;
+            }
+            case setCodeCommand::Cast:
+            {
+                emit serverCast(mapData);
+                break;
+            }
         }
     }
     qDebug() << sLog;

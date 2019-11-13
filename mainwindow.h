@@ -34,9 +34,11 @@ private:
     void showWarning(QString sParam);
     void collectDataAuth();
     void collectDataSend();
-    void showRoomsUserName(QVariantMap mapRooms);
+    void showRoomsUserName(QVariantMap mapRole);
     void showMessage();
+    void showCast(QVariantMap mapData);
     void upgradeRooms(QVariantMap mapNewRoom);
+    void delRoom();
 signals:
     void dataAuthCollected();
     void dataSendCollected(int roomID);

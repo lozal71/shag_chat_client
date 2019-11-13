@@ -6,7 +6,7 @@
 #include "protocol_out.h"
 #include <QDateTime>
 
-enum setCodeCommand {Auth = 1, Send = 2, NewRoom = 3, DelRoom = 4};
+enum setCodeCommand {Auth = 1, Send = 2, NewRoom = 3, DelRoom = 4, Cast = 5};
 
 struct clientData {
     QString login;
@@ -45,6 +45,8 @@ signals:
     void sessionClosed(QString sParam);
     void serverRespondedAuth(QVariantMap mapRooms);
     void serverRaspondedNewRoom(QVariantMap mapNewRoom);
+    void serverCast(QVariantMap mapData);
+    void serverDeletedRoom();
 };
 
 #endif // CHATCLIENT_H

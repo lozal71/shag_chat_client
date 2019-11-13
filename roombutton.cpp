@@ -1,22 +1,28 @@
 #include "roombutton.h"
 
-RoomButton::RoomButton()
-{
-
-}
-
-RoomButton::RoomButton(int ID, QString sName, QVariantMap mapUserMess)
+RoomButton::RoomButton(int ID, int role, QString sName, QVariantMap mapUserMess)
 {
     room.id = ID;
+    room.role = role;
     room.name = sName;
     room.mapMess = mapUserMess;
-    setText(sName);
+    if (role == 1)  {
+        setText(sName + " admin");
+    }
+    else {
+        setText(sName + " user");
+    }
     setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 }
 
 int RoomButton::getRoomID()
 {
     return room.id;
+}
+
+int RoomButton::getRole()
+{
+    return room.role;
 }
 
 QString RoomButton::getRoomName()
