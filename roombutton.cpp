@@ -44,3 +44,15 @@ void RoomButton::setMapMess(QVariantMap mapParam)
 {
     room.mapMess = mapParam;
 }
+
+void RoomButton::debugMapMess(QVariantMap mapTimeNameMess)
+{
+    for (const QString& time: mapTimeNameMess.keys()){
+        QVariantMap mapNameMess = mapTimeNameMess[time].toMap();
+        qDebug() << time << ": ";
+        for (const QString& name: mapNameMess.keys()) {
+            qDebug() << name << ": "<< mapNameMess[name].toString();
+        }
+
+    }
+}

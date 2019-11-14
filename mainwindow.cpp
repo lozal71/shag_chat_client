@@ -121,7 +121,7 @@ void MainWindow::showRoomsUserName(QVariantMap mapRole)
                     ui->vltListRooms->addWidget(btnRoom);
                     if (btnRoom->getRoomID() == 1){
                         this->roomActiv = btnRoom;
-                        this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
+                        //this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
                     }
                 }
 
@@ -135,12 +135,15 @@ void MainWindow::showMessage()
     ui->pbSend->setEnabled(true);
     ui->teChat->clear();
     QString sTemp="";
-    // определяем, какая кнопка нажата и считывем информацию о сообщениях в комнате
+    // определяем, какая кнопка нажата и назначаем ее активной
     this->roomActiv = static_cast<RoomButton*>(sender());
+    // определяем сообщения в активной комнате
     QVariantMap mapAllMess = roomActiv->getMapUserMess();
+    qDebug() << "read";
+    roomActiv->debugMapMess(mapAllMess["read"].toMap());
     // выделяем цветом активную комнату
     this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
-    qDebug() << "clicked from room button, room id is " << roomActiv->getRoomID();
+    //qDebug() << "clicked from room button, room id is " << roomActiv->getRoomID();
     // показываем прочитанные сообщения
     QVariantMap mapReadMessage = mapAllMess["read"].toMap();
     //qDebug() << "mapReadMessage" << mapReadMessage;
@@ -157,14 +160,14 @@ void MainWindow::showMessage()
         sTemp.clear();
     }
     // показываем непрочитанные сообщения
+    qDebug() << "unread";
+    roomActiv->debugMapMess(mapAllMess["unread"].toMap());
     QVariantMap mapUnreadMessage = mapAllMess["unread"].toMap();
     if (!mapUnreadMessage.isEmpty()){
         sTemp = "\n Unread \n";
         ui->teChat->setAlignment(Qt::AlignCenter);
         ui->teChat->insertPlainText(sTemp);
         sTemp.clear();
-        ui->teChat->insertPlainText(sTemp);
-
         //qDebug() << "mapUnreadMessage" << mapUnreadMessage;
         for (const QString& timeMess: mapUnreadMessage.keys()){
             sTemp = timeMess + ": ";
@@ -176,20 +179,25 @@ void MainWindow::showMessage()
                 ui->teChat->setAlignment(Qt::AlignLeft);
                 ui->teChat->insertPlainText(mapSenderMessage[sender].toString()+"\n");
             }
+            // переписываем все показанные сообщения в MAP прочитанных
             mapReadMessage[timeMess] = mapSenderMessage;
+            qDebug() << "transfer";
+            roomActiv->debugMapMess(mapReadMessage);
             sTemp.clear();
         }
+
     }
     mapUnreadMessage.clear();
+    mapAllMess["unread"]=mapUnreadMessage;
+    // показываем сообщения из онлайн рассылки
+    qDebug() << "cast";
+    roomActiv->debugMapMess(mapAllMess["cast"].toMap());
     QVariantMap mapCastMessage = mapAllMess["cast"].toMap();
     if (!mapCastMessage.isEmpty()){
-        // показываем рассылку
         sTemp = "\n Cast \n";
         ui->teChat->setAlignment(Qt::AlignCenter);
         ui->teChat->insertPlainText(sTemp);
         sTemp.clear();
-        ui->teChat->insertPlainText(sTemp);
-
         //qDebug() << "mapUnreadMessage" << mapUnreadMessage;
         for (const QString& timeMess: mapCastMessage.keys()){
             sTemp = timeMess + ": ";
@@ -201,11 +209,20 @@ void MainWindow::showMessage()
                 ui->teChat->setAlignment(Qt::AlignLeft);
                 ui->teChat->insertPlainText(mapSenderMessage[sender].toString()+"\n");
             }
+            // переписываем все показанные сообщения в MAP прочитанных
             mapReadMessage[timeMess] = mapSenderMessage;
             sTemp.clear();
+            qDebug() << "transfer";
+            roomActiv->debugMapMess(mapReadMessage);
         }
     }
     mapCastMessage.clear();
+    mapAllMess["cast"] = mapCastMessage;
+    mapAllMess["read"] = mapReadMessage;
+    qDebug() << "read";
+    roomActiv->debugMapMess(mapReadMessage);
+    roomActiv->setMapMess(mapAllMess);
+    // все остальные кнопки-комнаты красим в серый цвет
     QMutableListIterator<RoomButton*> iRoom(listRoomButton);
     RoomButton* currRoom;
     while (iRoom.hasNext()){
@@ -264,21 +281,29 @@ void MainWindow::showCastDelRoom(QVariantMap mapData)
 
 void MainWindow::showCast(QVariantMap mapData)
 {
+    qDebug() << "showCast";
     int roomID = mapData["roomID"].toInt();
-    QVariantMap newMapMess;
+    qDebug() << "showCast roomID " << roomID;
+    QVariantMap castMapMess = mapData["cast"].toMap();
+    QVariantMap currMapMess;
     QMutableListIterator<RoomButton*> iRoom(listRoomButton);
-    RoomButton* currRoom;
+    RoomButton* currRoom = roomActiv;
     while (iRoom.hasNext()){
         currRoom = iRoom.next();
         if (currRoom->getRoomID() == roomID ) {
             currRoom->setStyleSheet("font: 14px; color: white; background-color: green");
-            newMapMess = currRoom->getMapUserMess();
-            newMapMess["cast"] = mapData["cast"].toMap();
-            currRoom->setMapMess(newMapMess);
-            //qDebug() << "277" << currRoom->getMapUserMess();
+
+            currMapMess = currRoom->getMapUserMess();
+            QVariantMap currTimeMess = currMapMess["cast"].toMap();
+            for (const QString& time: castMapMess.keys()) {
+                QVariantMap mapMess = castMapMess[time].toMap();
+                currTimeMess[time]=castMapMess[time];
+            }
+            currMapMess["cast"] = currTimeMess;
             break;
         }
     }
+    currRoom->setMapMess(currMapMess);
 }
 
 void MainWindow::upgradeRooms(QVariantMap mapNewRoom)

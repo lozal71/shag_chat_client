@@ -64,7 +64,8 @@ void chatClient::readRespond()
             }
             case setCodeCommand::Send:
             {
-                sLog = "sendResult " + mapData["roomID"].toString();
+                sLog = "sendResult ";
+                emit serverCast(mapData);
                 break;
             }
             case setCodeCommand::NewRoom:
@@ -132,7 +133,9 @@ void chatClient::prepareQuerySendMessage(int roomID)
     mapCommand["codeCommand"] = setCodeCommand::Send;
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
-    qDebug() << "jdQuery" << jdQuery;
+    //qDebug() << "jdQuery" << jdQuery;
+
+
 
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);

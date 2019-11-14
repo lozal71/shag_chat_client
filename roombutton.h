@@ -15,6 +15,7 @@ public:
     QVariantMap getMapUserMess();
     void catchRoomClick();
     void setMapMess(QVariantMap mapParam);
+    void debugMapMess(QVariantMap mapMess);
 private:
     struct roomData {
         int id;
@@ -22,6 +23,7 @@ private:
         QString name;
         QVariantMap mapMess;
     } room;
+
 signals:
     void roomClicked(QVariantMap mapRooms);
 };
