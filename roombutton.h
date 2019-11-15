@@ -3,25 +3,29 @@
 #include <QDebug>
 #include <QVariantMap>
 #include <QPushButton>
+#include <QList>
 
 class RoomButton: public QPushButton
 {
     Q_OBJECT
 public:
-    RoomButton(int ID, int role, QString sName, QVariantMap mapUserMess);
+    RoomButton(int ID, QString role, QString sName, QVariantMap mapUserMess);
     int getRoomID();
-    int getRole();
+    QString getRole();
     QString getRoomName();
     QVariantMap getMapUserMess();
     void catchRoomClick();
     void setMapMess(QVariantMap mapParam);
     void debugMapMess(QVariantMap mapMess);
+    QList<QVariantMap> getListCastMess();
+    void setListCastMess(QList<QVariantMap> listCast);
 private:
     struct roomData {
         int id;
-        int role;
+        QString role;
         QString name;
         QVariantMap mapMess;
+        QList<QVariantMap> listCastMess;
     } room;
 
 signals:

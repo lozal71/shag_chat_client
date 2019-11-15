@@ -13,7 +13,7 @@ struct clientData {
     QString pass;
     int id;
     QString name;
-    QString text;
+    //QString text;
 };
 
 
@@ -25,13 +25,13 @@ public:
     ~chatClient();
     void connectClient();
     void prepareQueryAuth();
-    void prepareQuerySendMessage(int roomID);
+    void prepareQuerySendMessage(int roomID, QString text);
     void prepareQueryNewRoom(QString newRoomName);
     void prepareQueryDelRoom(int delRoomID);
     void sessionClose();
     void setLogin(QString param);
     void setPass(QString param);
-    void setText(QString param);
+//    void setText(QString param);
     void setRoomActivName(QString param);
     QString getName();
 private:

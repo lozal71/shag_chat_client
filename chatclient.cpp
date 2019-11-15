@@ -50,15 +50,15 @@ void chatClient::readRespond()
         switch (setCodeCommand(mapCommand["codeCommand"].toInt())) {
             case setCodeCommand::Auth:
             {
-                client.id = mapData["id"].toInt();
+                client.id = mapData.firstKey().toInt();
                 if (client.id ==0){
                      sLog = "Problem: login or password is not correct";
                 }
                 else {
                     sLog = "Authorization is success:";
-                    client.name = mapData["name"].toString();
-                    //qDebug() << "mapData[\"rooms\"].toMap()" <<mapData["rooms"].toMap() ;
-                    emit serverRespondedAuth(mapData["rooms"].toMap());
+                    QVariantMap  mapUserName= mapData.first().toMap();
+                    client.name = mapUserName.firstKey();
+                    emit serverRespondedAuth(mapUserName.first().toMap());
                 }
                 break;
             }
@@ -120,7 +120,7 @@ void chatClient::prepareQueryAuth()
     sendQuery();
 }
 
-void chatClient::prepareQuerySendMessage(int roomID)
+void chatClient::prepareQuerySendMessage(int roomID, QString text)
 {
     if (socket->state() == QTcpSocket::UnconnectedState){
         socket->connectToHost("127.0.0.1", 6000);
@@ -129,7 +129,7 @@ void chatClient::prepareQuerySendMessage(int roomID)
     QVariantMap mapCommand;
     QVariantMap mapData;
     mapData["roomID"] = roomID;
-    mapData["text"] = client.text;
+    mapData["text"] = text;
     mapCommand["codeCommand"] = setCodeCommand::Send;
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
@@ -196,11 +196,6 @@ void chatClient::setLogin(QString param)
 void chatClient::setPass(QString param)
 {
     client.pass = param;
-}
-
-void chatClient::setText(QString param)
-{
-    client.text = param;
 }
 
 

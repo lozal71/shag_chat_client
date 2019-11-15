@@ -1,17 +1,13 @@
 #include "roombutton.h"
 
-RoomButton::RoomButton(int ID, int role, QString sName, QVariantMap mapUserMess)
+RoomButton::RoomButton(int ID, QString role, QString sName, QVariantMap mapUserMess)
 {
     room.id = ID;
     room.role = role;
     room.name = sName;
     room.mapMess = mapUserMess;
-    if (role == 1)  {
-        setText(sName + " admin");
-    }
-    else {
-        setText(sName + " user");
-    }
+    setText(sName + " " + role);
+    room.listCastMess.clear();
     setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 }
 
@@ -20,7 +16,7 @@ int RoomButton::getRoomID()
     return room.id;
 }
 
-int RoomButton::getRole()
+QString RoomButton::getRole()
 {
     return room.role;
 }
@@ -55,4 +51,14 @@ void RoomButton::debugMapMess(QVariantMap mapTimeNameMess)
         }
 
     }
+}
+
+QList<QVariantMap> RoomButton::getListCastMess()
+{
+    return room.listCastMess;
+}
+
+void RoomButton::setListCastMess(QList<QVariantMap> listCast)
+{
+    room.listCastMess = listCast;
 }

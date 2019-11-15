@@ -9,7 +9,7 @@
 #include <dialogauth.h>
 #include <QMessageBox>
 #include <QInputDialog>
-#include <QList>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {class MainWindow;}
@@ -40,9 +40,10 @@ private:
     void showCast(QVariantMap mapData);
     void upgradeRooms(QVariantMap mapNewRoom);
     void delRoom(int delRoomID);
+    void showMessToTextEdit(QVariantMap mapMessID);
+    void upgradeMessage();
 signals:
     void dataAuthCollected();
-    void dataSendCollected(int roomID);
     void dataNewRoomCollected(QString newRoomName);
     void dataDelRoomCollected(int delRoomID);
 private slots:
