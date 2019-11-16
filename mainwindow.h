@@ -26,22 +26,19 @@ public:
 private:
     Ui::MainWindow *ui;
     chatClient * client;
-    //int roomActivID;
     RoomButton* roomActiv;
     QList<RoomButton*> listRoomButton;
-
     void connectClientUI();
     void showWarning(QString sParam);
     void collectDataAuth();
     void collectDataSend();
-    void showRoomsUserName(QVariantMap mapRole);
+    void showRoomsUserName(QVariantMap mapRoomsID);
     void showMessage();
     void showCastDelRoom(QVariantMap mapData);
     void showCast(QVariantMap mapData);
     void upgradeRooms(QVariantMap mapNewRoom);
     void delRoom(int delRoomID);
     void showMessToTextEdit(QVariantMap mapMessID);
-    void upgradeMessage();
 signals:
     void dataAuthCollected();
     void dataNewRoomCollected(QString newRoomName);

@@ -74,7 +74,6 @@ void MainWindow::collectDataSend()
 {
     // если LineEdit не пусто
     if (!ui->leWriteMes->text().isEmpty()){
-        //client->setText(ui->leWriteMes->text());
         // показваем сообщение в TextRdit справа
         ui->teChat->setAlignment(Qt::AlignRight);
         ui->teChat->insertPlainText( ui->leWriteMes->text() +"\n");
@@ -89,36 +88,31 @@ void MainWindow::collectDataSend()
 }
 
 // показ комнат и имени пользователя
-void MainWindow::showRoomsUserName(QVariantMap mapRole)
+void MainWindow::showRoomsUserName(QVariantMap mapRoomsID)
 {
     ui->actionAuth->setEnabled(false);
     // создаем объект QLabel и записываем имя клиента
     QLabel *lblName = new QLabel(client->getName());
     // помещаем QLabel в mainToolBar
     ui->mainToolBar->addWidget(lblName);
-    // разворачиваем map по ключу role: admin или user
-    for (const QString& role: mapRole.keys()){
-        QVariantMap mapRooms = mapRole[role].toMap();
-        // по ключу ID - комнаты
-        for (const QString& roomID: mapRooms.keys()){
-            QVariantMap mapRoomName = mapRooms[roomID].toMap();
-            // по имени комнаты
-            for (const QString& roomName: mapRoomName.keys()) {
-                // создаем кнопку-комнату
-                RoomButton *btnRoom = new RoomButton(roomID.toInt(), role,
-                                                     roomName,
-                                                     mapRoomName[roomName].toMap());
-                // клик по комнате - показ сообщения комнаты
-                connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
-                // собираем список кнопок-комнат
-                listRoomButton.append(btnRoom);
-                // добавляем виджет на вертикальный слой
-                ui->vltListRooms->addWidget(btnRoom);
-                // комнату с ID = 1 (default) назначаем активной
-                if (btnRoom->getRoomID() == 1){
-                    this->roomActiv = btnRoom;
-                }
-            }
+
+    // разворачиваем map по ключу roomID
+    for (const QString& sRoomID: mapRoomsID.keys()){
+        QVariantMap mapRooms = mapRoomsID[sRoomID].toMap();
+        // создаем кнопку-комнату
+        RoomButton *btnRoom = new RoomButton(mapRooms["roomID"].toInt(),
+                                             mapRooms["role"].toString(),
+                                             mapRooms["roomName"].toString(),
+                                             mapRooms["mess"].toMap());
+        // клик по комнате - показ сообщения комнаты
+        connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
+        // собираем список кнопок-комнат
+        listRoomButton.append(btnRoom);
+        // добавляем виджет на вертикальный слой
+        ui->vltListRooms->addWidget(btnRoom);
+        // комнату с ID = 1 (default) назначаем активной
+        if (btnRoom->getRoomID() == 1){
+            this->roomActiv = btnRoom;
         }
     }
 }
@@ -181,24 +175,8 @@ void MainWindow::showMessage()
 void MainWindow::showCastDelRoom(QVariantMap mapData)
 {
     //qDebug() << "showCastDelRoom";
-    QMutableListIterator<RoomButton*> iRoom(listRoomButton);
-    RoomButton* currRoom;
-    while (iRoom.hasNext()){
-        currRoom = iRoom.next();
-        if (currRoom->getRoomID() == 1 ) {
-            this->roomActiv = currRoom;
-            this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
-            QString sTemp;
-            ui->teChat->setAlignment(Qt::AlignCenter);
-            sTemp = "from server cast \n";
-            ui->teChat->insertPlainText(sTemp);
-            ui->teChat->setAlignment(Qt::AlignLeft);
-            ui->teChat->insertPlainText(mapData["cast"].toString());
-            break;
-        }
-    }
     QMutableListIterator<RoomButton*> iiRoom(listRoomButton);
-    iRoom.toFront();
+    RoomButton* currRoom = roomActiv;
     while (iiRoom.hasNext()){
          currRoom = iiRoom.next();
          //qDebug() << currRoom->getRoomName();
@@ -212,33 +190,33 @@ void MainWindow::showCastDelRoom(QVariantMap mapData)
             //qDebug() << "listRoomButton" << listRoomButton;
             break;
         }
-    }
-
-    iRoom.toFront();
+    }    
+    QList<QVariantMap> castList;
+    QListIterator<RoomButton*> iRoom(listRoomButton);
     while (iRoom.hasNext()){
         currRoom = iRoom.next();
-        if (currRoom->getRoomID() != 1 ) {
-            currRoom->setStyleSheet("font: 14px; color: black; background-color: gray");
+        if (currRoom->getRoomID() == 1) {
+            castList = currRoom->getListCastMess();
+            castList.append(mapData);
+            currRoom->setStyleSheet("font: 14px; color: white; background-color: green");
+            break;
         }
     }
+    currRoom->setListCastMess(castList);
 }
 
 void MainWindow::showCast(QVariantMap mapData)
 {
     qDebug() << "showCast";
-    int roomID = mapData.firstKey().toInt();
-    //qDebug() << "showCast roomID " << roomID;
-    QVariantMap castMapMess = mapData.first().toMap();
+    int roomID = mapData["roomID"].toInt();
     QListIterator<RoomButton*> iRoom(listRoomButton);
-    //QMutableListIterator<RoomButton*> iRoom(listRoomButton);
     RoomButton* currRoom = roomActiv;
     QList<QVariantMap> castList;
     while (iRoom.hasNext()){
         currRoom = iRoom.next();
         if (currRoom->getRoomID() == roomID ) {
-            qDebug() << "showCast 226";
             castList = currRoom->getListCastMess();
-            castList.append(castMapMess);
+            castList.append(mapData);
             break;
         }
     }
@@ -247,7 +225,8 @@ void MainWindow::showCast(QVariantMap mapData)
         currRoom->setStyleSheet("font: 14px; color: white; background-color: green");
     }
     else{
-        upgradeMessage();
+        emit roomActiv->clicked();
+        //upgradeMessage();
     }
     qDebug() << "232" << currRoom->getListCastMess();
 }
@@ -275,11 +254,11 @@ void MainWindow::delRoom(int delRoomID)
         currRoom = iRoom.next();
         if (currRoom->getRoomID() == 1){
             roomActiv = currRoom;
-            this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
+            //this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
             break;
         }
     }
-    // находим комнату с id=delRoomID и удаляем ее
+    // находим комнату с id = delRoomID и удаляем ее
     iRoom.toFront();
     while (iRoom.hasNext()){
         currRoom = iRoom.next();
@@ -317,43 +296,6 @@ void MainWindow::showMessToTextEdit(QVariantMap mapMessID)
          ui->teChat->insertPlainText(timeMess + ": from " + senderName + "\n");
          ui->teChat->setAlignment(Qt::AlignLeft);
          ui->teChat->insertPlainText(text + "\n");
-    }
-}
-
-void MainWindow::upgradeMessage()
-{
-    ui->teChat->clear();
-    // определяем сообщения в активной комнате
-    QVariantMap mapAllMess = roomActiv->getMapUserMess();
-     // показываем прочитанные сообщения
-    QVariantMap mapReadMessage = mapAllMess["read"].toMap();
-    showMessToTextEdit(mapReadMessage);
-    // показываем непрочитанные сообщения
-    QVariantMap mapUnreadMessage = mapAllMess["unread"].toMap();
-    if (!mapUnreadMessage.isEmpty()){
-        ui->teChat->setAlignment(Qt::AlignCenter);
-        ui->teChat->insertPlainText("\n Unread \n");
-        showMessToTextEdit(mapUnreadMessage);
-    }
-    // показываем сообщения из онлайн рассылки
-    if (!roomActiv->getListCastMess().isEmpty()){
-        ui->teChat->setAlignment(Qt::AlignCenter);
-        ui->teChat->insertPlainText("\n Cast \n");
-        QListIterator<QVariantMap> iCast(roomActiv->getListCastMess());
-        QVariantMap mapMess;
-        while (iCast.hasNext()){
-            mapMess = iCast.next();
-            QString timeMess;
-            QString senderName;
-            QString text;
-             timeMess =  mapMess["timeMess"].toString();
-             senderName = mapMess["senderName"].toString();
-             text =  mapMess["textMess"].toString();
-             ui->teChat->setAlignment(Qt::AlignCenter);
-             ui->teChat->insertPlainText(timeMess + ": from " + senderName + "\n");
-             ui->teChat->setAlignment(Qt::AlignLeft);
-             ui->teChat->insertPlainText(text + "\n");
-        }
     }
 }
 
@@ -399,12 +341,13 @@ void MainWindow::on_actionDeleteRoom_triggered()
 {
     int r;
     QString sTemp = "Delete room " + roomActiv->getRoomName() + " ?";
-    if (roomActiv->getRole() == 1){
+    if (roomActiv->getRole() == "admin"){
         QMessageBox quest(QMessageBox::Question,"Question",sTemp);
         quest.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
         r=quest.exec();
         if(r == QMessageBox::Yes) {
-            emit dataDelRoomCollected(roomActiv->getRoomID());
+            client->prepareQueryDelRoom(roomActiv->getRoomID());
+            //emit dataDelRoomCollected(roomActiv->getRoomID());
         }
     }
     else{

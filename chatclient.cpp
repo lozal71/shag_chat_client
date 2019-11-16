@@ -50,15 +50,16 @@ void chatClient::readRespond()
         switch (setCodeCommand(mapCommand["codeCommand"].toInt())) {
             case setCodeCommand::Auth:
             {
-                client.id = mapData.firstKey().toInt();
+                this->client.id = mapData["userID"].toInt();
                 if (client.id ==0){
                      sLog = "Problem: login or password is not correct";
                 }
                 else {
                     sLog = "Authorization is success:";
                     QVariantMap  mapUserName= mapData.first().toMap();
-                    client.name = mapUserName.firstKey();
-                    emit serverRespondedAuth(mapUserName.first().toMap());
+                    this->client.id = mapData["userID"].toInt();
+                    this->client.name = mapData["userName"].toString();
+                    emit serverRespondedAuth(mapData["rooms"].toMap());
                 }
                 break;
             }
@@ -78,7 +79,7 @@ void chatClient::readRespond()
             case setCodeCommand::DelRoom:
             {
                 sLog = "delRoomID " + mapData["delRoomID"].toString();
-                emit serverDeletedRoom( mapData["delRoomID"].toInt());
+                emit serverDeletedRoom(mapData["delRoomID"].toInt());
                 break;
             }
             case setCodeCommand::CastDelRoom:
@@ -134,8 +135,6 @@ void chatClient::prepareQuerySendMessage(int roomID, QString text)
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
-
-
 
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
