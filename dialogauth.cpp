@@ -10,12 +10,12 @@ DialogAuth::DialogAuth(QWidget *parent) :
     fullCbxPasswords();
     authAgain = false;
     flagExit = false;
-    qDebug() << "constructur flagExit" << flagExit;
+    //qDebug() << "constructur flagExit" << flagExit;
 }
 
 DialogAuth::~DialogAuth()
 {
-    qDebug() << "deconstructur flagexit" << flagExit;
+    //qDebug() << "deconstructur flagexit" << flagExit;
     delete ui;
 }
 
@@ -61,18 +61,18 @@ void DialogAuth::showWarningAuth(QString sParam)
     if(r == QMessageBox::Yes) {
         authAgain = true;
         flagExit = false;
-        qDebug() << "yes";
+        //qDebug() << "yes";
     }
     else {
         authAgain = false;
         flagExit = true;
-        qDebug() << "no flagExit" << flagExit;
+        //qDebug() << "no flagExit" << flagExit;
     }
 }
 
 void DialogAuth::on_buttonBox_rejected()
 {
-    qDebug() << "on_buttonBox_rejected";
+    //qDebug() << "on_buttonBox_rejected";
     flagExit = true;
     //QApplication::exit();
 }

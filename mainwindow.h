@@ -7,8 +7,8 @@
 #include "roombutton.h"
 #include <QMainWindow>
 #include <dialogauth.h>
-
 #include <QInputDialog>
+#include "dialoginvite.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -25,6 +25,7 @@ public:
     ~MainWindow();
     chatClient* getClient();
     DialogAuth *dialogAuth;
+    DialogInvite *invite;
 private:
     Ui::MainWindow *ui;
     chatClient * client;
@@ -53,6 +54,7 @@ private slots:
     void on_actionAuth_triggered();
     void on_actionDeleteRoom_triggered();
 
+    void on_actionInvite_triggered();
 };
 
 #endif // MAINWINDOW_H

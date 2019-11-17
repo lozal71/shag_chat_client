@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     client = new chatClient();
     dialogAuth = new DialogAuth();
+    invite = new DialogInvite();
     connectClientUI();
     ui->leWriteMes->setPlaceholderText("Please, write here...");
     ui->teChat->setReadOnly(true);
@@ -17,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-
+    delete invite;
     delete dialogAuth;
     delete client;
     delete ui;
@@ -403,4 +404,16 @@ void MainWindow::on_actionDeleteRoom_triggered()
     }
 }
 
-
+void MainWindow::on_actionInvite_triggered()
+{
+    if (roomActiv->getRole() == "admin"){
+        if(invite->exec() == QDialog::Accepted){
+            client->prepareQueryInvite(invite->getUserName(),
+                                       invite->getTextInvite(),
+                                       this->roomActiv->getRoomID());
+        }
+    }
+    else{
+        showWarning("You are not admin of room: " + roomActiv->getRoomName());
+    }
+}

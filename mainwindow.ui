@@ -566,6 +566,7 @@
     </property>
     <addaction name="actionAuth"/>
     <addaction name="actionNewRoom"/>
+    <addaction name="actionInvite"/>
     <addaction name="actionDeleteRoom"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -598,6 +599,11 @@
   <action name="actionDeleteRoom">
    <property name="text">
     <string>DeleteRoom</string>
+   </property>
+  </action>
+  <action name="actionInvite">
+   <property name="text">
+    <string>Invite user</string>
    </property>
   </action>
  </widget>

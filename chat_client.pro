@@ -21,6 +21,7 @@ CONFIG += c++11
 SOURCES += \
         chatclient.cpp \
         dialogauth.cpp \
+        dialoginvite.cpp \
         main.cpp \
         mainwindow.cpp \
         protocol_in.cpp \
@@ -30,6 +31,7 @@ SOURCES += \
 HEADERS += \
         chatclient.h \
         dialogauth.h \
+        dialoginvite.h \
         mainwindow.h \
         protocol_in.h \
         protocol_out.h \
@@ -37,6 +39,7 @@ HEADERS += \
 
 FORMS += \
         dialogauth.ui \
+        dialoginvite.ui \
         mainwindow.ui
 
 # Default rules for deployment.

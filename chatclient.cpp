@@ -179,6 +179,28 @@ void chatClient::prepareQueryDelRoom(int delRoomID)
     sendQuery();
 }
 
+void chatClient::prepareQueryInvite(QString userName, QString text, int roomID)
+{
+    if (socket->state() == QTcpSocket::UnconnectedState){
+        socket->connectToHost("127.0.0.1", 6000);
+    }
+    // формирование JSON- документа
+  QVariantMap mapCommand;
+  QVariantMap mapData;
+  mapData["roomID"] = roomID;
+  mapData["username"] = userName;
+  mapData["textInvite"] = text;
+  mapCommand["codeCommand"] = setCodeCommand::Invite;
+  mapCommand["joDataInput"] = mapData;
+  QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
+  //qDebug() << "jdQuery" << jdQuery;
+
+  // сформировать выходной пакет для отправки на сервер
+  out->setPackage(jdQuery);
+  // послать запрос
+  sendQuery();
+}
+
 void chatClient::sessionClose()
 {
     emit sessionClosed("Disconnect. Session closed",

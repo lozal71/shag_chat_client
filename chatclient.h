@@ -7,7 +7,8 @@
 #include <QDateTime>
 
 enum setDisconnect {fromServer, fromClient, undefined};
-enum setCodeCommand {Auth = 1, Send = 2, NewRoom = 3, DelRoom = 4, CastDelRoom = 5, CastMess = 6};
+enum setCodeCommand {Auth = 1, Send = 2, NewRoom = 3, DelRoom = 4,
+                     CastDelRoom = 5, CastMess = 6, Invite = 7};
 
 struct clientData {
     int id;
@@ -26,6 +27,7 @@ public:
     void prepareQuerySendMessage(int roomID, QString text);
     void prepareQueryNewRoom(QString newRoomName);
     void prepareQueryDelRoom(int delRoomID);
+    void prepareQueryInvite(QString userName, QString text, int roomID);
     void sessionClose();
     void setRoomActivName(QString param);
     QString getName();
