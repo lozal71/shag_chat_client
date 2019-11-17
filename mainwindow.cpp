@@ -7,14 +7,18 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     client = new chatClient();
+    dialogAuth = new DialogAuth();
     connectClientUI();
     ui->leWriteMes->setPlaceholderText("Please, write here...");
     ui->teChat->setReadOnly(true);
     ui->actionAuth->setEnabled(false);
+    flagActionQuit = false;
 }
 
 MainWindow::~MainWindow()
 {
+
+    delete dialogAuth;
     delete client;
     delete ui;
 }
@@ -30,16 +34,25 @@ void MainWindow::connectClientUI()
     // данные для Авторизации собраны - клиент готовит запрос на Авторизацию
     connect(this,&MainWindow::dataAuthCollected,
             client, &chatClient::prepareQueryAuth);
-    // сессия закрылась - выводим сообщение в окно логирования
+
+    // сессия закрылась - выводим предупреждение
     connect(client, &chatClient::sessionClosed,
-            this, &MainWindow::showWarning);
+            this, &MainWindow::showWarningDisconnect);
+
     connect(client, &chatClient::noConnect,
-            this,&MainWindow::showWarning);
+            this,&MainWindow::showWarningDisconnect);
+
+    connect(client, &chatClient::authNotCorrected,
+            dialogAuth, &DialogAuth::showWarningAuth);
+
     // сервер прислал ответ на авторизацию - показываем комнаты и имя пользователя
     connect(client, &chatClient::serverRespondedAuth,
             this, &MainWindow::showRoomsUserName);
+
     // клик по кнопке-Send - собираем данные для отправки сообщения
     connect(ui->pbSend, &QPushButton::clicked,
+            this, &MainWindow::collectDataSend);
+    connect(ui->leWriteMes, &QLineEdit::returnPressed,
             this, &MainWindow::collectDataSend);
 
     connect(this,&MainWindow::dataNewRoomCollected,
@@ -59,24 +72,51 @@ void MainWindow::connectClientUI()
 
     connect(client, &chatClient::serverDeletedRoom,
             this, &MainWindow::delRoom);
- }
-
+}
 
 void MainWindow::showWarning(QString sParam)
 {
     QMessageBox msbx(QMessageBox::Warning,"Warning",sParam);
     msbx.exec();
-    ui->actionAuth->setEnabled(true);
 }
+
+
+void MainWindow::showWarningDisconnect(QString sParam, setDisconnect discParam)
+{
+
+    switch (discParam) {
+    case setDisconnect::fromServer:
+    {
+        QMessageBox msbx(QMessageBox::Warning,"Warning",sParam);
+        msbx.exec();
+        ui->actionAuth->setEnabled(true);
+        break;
+    }
+    case setDisconnect::fromClient:
+        QApplication::exit(0);
+        break;
+     case setDisconnect::undefined:
+        if (!flagActionQuit){
+            QMessageBox msbx(QMessageBox::Warning,"Warning",sParam);
+            msbx.exec();
+        }
+        ui->actionAuth->setEnabled(true);
+        break;
+    }
+    QLabel *lblWarning = new QLabel(sParam);
+    // помещаем QLabel в mainToolBar
+    ui->mainToolBar->addWidget(lblWarning);
+}
+
 
 // сбор данных для отправки сообщения
 void MainWindow::collectDataSend()
 {
     // если LineEdit не пусто
     if (!ui->leWriteMes->text().isEmpty()){
-        // показваем сообщение в TextRdit справа
-        ui->teChat->setAlignment(Qt::AlignRight);
-        ui->teChat->insertPlainText( ui->leWriteMes->text() +"\n");
+//        // показваем сообщение в TextRdit справа
+//        ui->teChat->setAlignment(Qt::AlignRight);
+//        ui->teChat->insertPlainText( ui->leWriteMes->text() +"\n");
 
         // подготовка запроса - "отправка сообщения"
         client->prepareQuerySendMessage(roomActiv->getRoomID(),
@@ -90,12 +130,12 @@ void MainWindow::collectDataSend()
 // показ комнат и имени пользователя
 void MainWindow::showRoomsUserName(QVariantMap mapRoomsID)
 {
+    dialogAuth->authAgain=false;
     ui->actionAuth->setEnabled(false);
     // создаем объект QLabel и записываем имя клиента
-    QLabel *lblName = new QLabel(client->getName());
+    QLabel *lblName = new QLabel(client->getName() + " ");
     // помещаем QLabel в mainToolBar
     ui->mainToolBar->addWidget(lblName);
-
     // разворачиваем map по ключу roomID
     for (const QString& sRoomID: mapRoomsID.keys()){
         QVariantMap mapRooms = mapRoomsID[sRoomID].toMap();
@@ -203,11 +243,14 @@ void MainWindow::showCastDelRoom(QVariantMap mapData)
         }
     }
     currRoom->setListCastMess(castList);
+    QLabel *lblDelRoom = new QLabel(mapData["textMess"].toString() + " ");
+    // помещаем QLabel в mainToolBar
+    ui->mainToolBar->addWidget(lblDelRoom);
 }
 
 void MainWindow::showCast(QVariantMap mapData)
 {
-    qDebug() << "showCast";
+    //qDebug() << "showCast";
     int roomID = mapData["roomID"].toInt();
     QListIterator<RoomButton*> iRoom(listRoomButton);
     RoomButton* currRoom = roomActiv;
@@ -228,7 +271,7 @@ void MainWindow::showCast(QVariantMap mapData)
         emit roomActiv->clicked();
         //upgradeMessage();
     }
-    qDebug() << "232" << currRoom->getListCastMess();
+    //qDebug() << "232" << currRoom->getListCastMess();
 }
 
 void MainWindow::upgradeRooms(QVariantMap mapNewRoom)
@@ -302,6 +345,7 @@ void MainWindow::showMessToTextEdit(QVariantMap mapMessID)
 void MainWindow::on_actionQuit_triggered()
 {
     QApplication::exit();
+    flagActionQuit = true;
 }
 
 void MainWindow::on_actionNewRoom_triggered()
@@ -319,21 +363,25 @@ void MainWindow::on_actionNewRoom_triggered()
 
 void MainWindow::on_actionAuth_triggered()
 {
-    DialogAuth *uiLog = new DialogAuth();
-    if(uiLog->exec() == QDialog::Accepted){
-        //QListIterator<RoomButton*> iRoom(listRoomButton);
-        QMutableListIterator<RoomButton*> iRoom(listRoomButton);
-        RoomButton* currRoom;
-        while (iRoom.hasNext()){
-            currRoom = iRoom.next();
-            ui->vltListRooms->removeWidget(currRoom);
-            iRoom.remove();
-           delete currRoom;
+    QMutableListIterator<RoomButton*> iRoom(listRoomButton);
+    RoomButton* currRoom;
+    while (iRoom.hasNext()){
+        currRoom = iRoom.next();
+        ui->vltListRooms->removeWidget(currRoom);
+        iRoom.remove();
+       delete currRoom;
+    }
+    ui->mainToolBar->clear();
+    dialogAuth->authAgain=false;
+    dialogAuth->flagExit = false;
+    do{
+        if(dialogAuth->exec() == QDialog::Accepted){
+            emit dataAuthCollected(dialogAuth->getLogin(),
+                                   dialogAuth->getPass());
         }
-        ui->mainToolBar->clear();
-        client->setLogin(uiLog->getLogin());
-        client->setPass(uiLog->getPass());
-        emit dataAuthCollected();
+    } while (dialogAuth->authAgain);
+    if (dialogAuth->flagExit) {
+        QApplication::exit(0);
     }
 }
 
@@ -354,3 +402,5 @@ void MainWindow::on_actionDeleteRoom_triggered()
         showWarning("You are not admin of room: " + roomActiv->getRoomName());
     }
 }
+
+

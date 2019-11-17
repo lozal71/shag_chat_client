@@ -2,6 +2,8 @@
 #define DIALOGAUTH_H
 
 #include <QDialog>
+#include <QMessageBox>
+#include <QDebug>
 //#if QT_VERSION >= 0x050000
 //#include <QtWidgets/QDialog>
 //#else
@@ -21,8 +23,13 @@ public:
     ~DialogAuth();
     QString getLogin();
     QString getPass();
+    bool authAgain;
+    bool flagExit;
+    void showWarningAuth(QString sParam);
 private slots:
     void on_buttonBox_accepted();
+
+    void on_buttonBox_rejected();
 
 private:
     Ui::DialogAuth *ui;

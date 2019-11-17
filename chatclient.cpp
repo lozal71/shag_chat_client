@@ -8,9 +8,6 @@ chatClient::chatClient()
     in = new protocolIn();
     client.id = 0;
     client.name.clear();
-    client.pass.clear();
-    client.login.clear();
-    //client.mapRooms.clear();
     connectClient();
 }
 
@@ -35,7 +32,7 @@ void chatClient::readRespond()
 {
     // получаем JSON-документ из сокета
     QJsonDocument jdTemp = in->receiveJSONdoc(socket);
-    qDebug() << "jdTemp" << jdTemp;
+    //qDebug() << "jdTemp" << jdTemp;
     QString sLog;
     if (in->isError()){
         sLog = "Problem: error massage";
@@ -52,7 +49,8 @@ void chatClient::readRespond()
             {
                 this->client.id = mapData["userID"].toInt();
                 if (client.id ==0){
-                     sLog = "Problem: login or password is not correct";
+                     sLog = "Problem: login or password is not correct. Try again?";
+                     emit authNotCorrected(sLog);
                 }
                 else {
                     sLog = "Authorization is success:";
@@ -99,8 +97,7 @@ void chatClient::readRespond()
     qDebug() << sLog;
 }
 
-
-void chatClient::prepareQueryAuth()
+void chatClient::prepareQueryAuth(QString login, QString pass)
 {
     if (socket->state() == QTcpSocket::UnconnectedState){
         socket->connectToHost("127.0.0.1", 6000);
@@ -108,8 +105,8 @@ void chatClient::prepareQueryAuth()
     // формирование JSON- документа
     QVariantMap mapCommand;
     QVariantMap mapData;
-    mapData["login"] = client.login;
-    mapData["pass"] = client.pass;
+    mapData["login"] = login;
+    mapData["pass"] = pass;
     mapCommand["codeCommand"] = setCodeCommand::Auth;
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
@@ -184,45 +181,34 @@ void chatClient::prepareQueryDelRoom(int delRoomID)
 
 void chatClient::sessionClose()
 {
-    emit sessionClosed("Disconnect. Session closed");
+    emit sessionClosed("Disconnect. Session closed",
+                       setDisconnect::undefined);
 }
-
-void chatClient::setLogin(QString param)
-{
-    client.login= param;
-}
-
-void chatClient::setPass(QString param)
-{
-    client.pass = param;
-}
-
 
 QString chatClient::getName()
 {
     return client.name;
 }
 
-
 void chatClient::sendQuery()
 {
     // если сокет дождался соединения с сервером
     if (socket->waitForConnected()){
          // запись выходного пакета в сокет
-        //qDebug() << "out->getPackage()" << out->getPackage();
         socket->write(out->getPackage());
         // ожидание ответа
         // если ответ не получен в течение 5 секунд
         if (!socket->waitForReadyRead(5000)) {
             // формируем ответ
-            emit sessionClosed("Problem: server time out \n");
+            emit sessionClosed("Problem: server time out",
+                               setDisconnect::fromServer);
             //qDebug() << "time out";
         }
     }
     else{
-        //emit serverRespondedLog("Problem: no connection to server \n");
         qDebug() << "Problem: no connection to server";
-        emit noConnect("Problem: no connection to server");
+        emit noConnect("Problem: no connection to server",
+                       setDisconnect::fromServer);
     }
 }
 

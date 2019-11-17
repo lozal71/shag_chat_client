@@ -7,13 +7,14 @@
 #include "roombutton.h"
 #include <QMainWindow>
 #include <dialogauth.h>
-#include <QMessageBox>
+
 #include <QInputDialog>
 
 
 QT_BEGIN_NAMESPACE
 namespace Ui {class MainWindow;}
 QT_END_NAMESPACE
+
 
 class MainWindow : public QMainWindow
 {
@@ -23,12 +24,15 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     chatClient* getClient();
+    DialogAuth *dialogAuth;
 private:
     Ui::MainWindow *ui;
     chatClient * client;
     RoomButton* roomActiv;
     QList<RoomButton*> listRoomButton;
+    bool flagActionQuit;
     void connectClientUI();
+    void showWarningDisconnect(QString sParam, setDisconnect discParam);
     void showWarning(QString sParam);
     void collectDataAuth();
     void collectDataSend();
@@ -40,7 +44,7 @@ private:
     void delRoom(int delRoomID);
     void showMessToTextEdit(QVariantMap mapMessID);
 signals:
-    void dataAuthCollected();
+    void dataAuthCollected(QString login, QString pass);
     void dataNewRoomCollected(QString newRoomName);
     void dataDelRoomCollected(int delRoomID);
 private slots:
@@ -48,6 +52,7 @@ private slots:
     void on_actionNewRoom_triggered();
     void on_actionAuth_triggered();
     void on_actionDeleteRoom_triggered();
+
 };
 
 #endif // MAINWINDOW_H

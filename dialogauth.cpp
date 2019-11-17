@@ -8,11 +8,14 @@ DialogAuth::DialogAuth(QWidget *parent) :
     ui->setupUi(this);
     fullCbxLogins();
     fullCbxPasswords();
-
+    authAgain = false;
+    flagExit = false;
+    qDebug() << "constructur flagExit" << flagExit;
 }
 
 DialogAuth::~DialogAuth()
 {
+    qDebug() << "deconstructur flagexit" << flagExit;
     delete ui;
 }
 
@@ -45,4 +48,31 @@ void DialogAuth::on_buttonBox_accepted()
 {
     login = ui->cbxLogin->currentText();
     pass = ui->cbxPass->currentText();
+}
+
+void DialogAuth::showWarningAuth(QString sParam)
+{
+    int r;
+    // сообщаем пользователю о проблеме авторизации
+    // и спрашиваем хочет ли он попробовать еще раз
+    QMessageBox quest(QMessageBox::Question,"Question",sParam);
+    quest.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
+    r=quest.exec();
+    if(r == QMessageBox::Yes) {
+        authAgain = true;
+        flagExit = false;
+        qDebug() << "yes";
+    }
+    else {
+        authAgain = false;
+        flagExit = true;
+        qDebug() << "no flagExit" << flagExit;
+    }
+}
+
+void DialogAuth::on_buttonBox_rejected()
+{
+    qDebug() << "on_buttonBox_rejected";
+    flagExit = true;
+    //QApplication::exit();
 }
