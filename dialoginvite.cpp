@@ -7,6 +7,8 @@ DialogInvite::DialogInvite(QWidget *parent) :
     ui(new Ui::DialogInvite)
 {
     ui->setupUi(this);
+    fullCbxUserName();
+    fullCbxTextInvite();
 }
 
 DialogInvite::~DialogInvite()

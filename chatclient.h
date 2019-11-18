@@ -8,7 +8,7 @@
 
 enum setDisconnect {fromServer, fromClient, undefined};
 enum setCodeCommand {Auth = 1, Send = 2, NewRoom = 3, DelRoom = 4,
-                     CastDelRoom = 5, CastMess = 6, Invite = 7};
+                     CastDelRoom = 5, CastMess = 6, Invite = 7, questInvite = 8};
 
 struct clientData {
     int id;
@@ -47,6 +47,7 @@ signals:
     void serverDeletedRoom(int delRoomID);
     void noConnect(QString sParam, setDisconnect discParam);
     void authNotCorrected(QString sParam);
+    void serverNotifyInvite(QVariantMap mapInvitations);
 };
 
 #endif // CHATCLIENT_H

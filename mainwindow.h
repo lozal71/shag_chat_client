@@ -26,6 +26,8 @@ public:
     chatClient* getClient();
     DialogAuth *dialogAuth;
     DialogInvite *invite;
+    QLabel *lblWarning;
+    QLabel *lblUserName;
 private:
     Ui::MainWindow *ui;
     chatClient * client;
@@ -44,6 +46,7 @@ private:
     void upgradeRooms(QVariantMap mapNewRoom);
     void delRoom(int delRoomID);
     void showMessToTextEdit(QVariantMap mapMessID);
+    void showNotifyInvite(QVariantMap mapInvitations);
 signals:
     void dataAuthCollected(QString login, QString pass);
     void dataNewRoomCollected(QString newRoomName);

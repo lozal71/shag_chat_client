@@ -45,53 +45,65 @@ void chatClient::readRespond()
         QVariantMap mapData =  mapCommand["joDataInput"].toMap();
         //qDebug() << "mapData" << mapData;
         switch (setCodeCommand(mapCommand["codeCommand"].toInt())) {
-            case setCodeCommand::Auth:
-            {
+        case setCodeCommand::Auth:
+        {
+            this->client.id = mapData["userID"].toInt();
+            if (client.id ==0){
+                 sLog = "Problem: login or password is not correct. Try again?";
+                 emit authNotCorrected(sLog);
+            }
+            else {
+                sLog = "Authorization is success:";
+                QVariantMap  mapUserName= mapData.first().toMap();
                 this->client.id = mapData["userID"].toInt();
-                if (client.id ==0){
-                     sLog = "Problem: login or password is not correct. Try again?";
-                     emit authNotCorrected(sLog);
+                this->client.name = mapData["userName"].toString();
+                emit serverRespondedAuth(mapData["rooms"].toMap());
+                if (!mapData["invite"].toMap().isEmpty()){
+                    emit serverNotifyInvite(mapData["invite"].toMap());
                 }
-                else {
-                    sLog = "Authorization is success:";
-                    QVariantMap  mapUserName= mapData.first().toMap();
-                    this->client.id = mapData["userID"].toInt();
-                    this->client.name = mapData["userName"].toString();
-                    emit serverRespondedAuth(mapData["rooms"].toMap());
-                }
-                break;
             }
-            case setCodeCommand::Send:
-            {
-                sLog = "sendResult ";
-                emit serverCast(mapData);
-                break;
+            break;
+        }
+        case setCodeCommand::Send:
+        {
+            sLog = "sendResult ";
+            emit serverCast(mapData);
+            break;
+        }
+        case setCodeCommand::NewRoom:
+        {
+            sLog = "newRoomID " + mapData["newRoomID"].toString();
+            sLog += "newRoomName" + mapData["newRoomName"].toString();
+            emit serverRaspondedNewRoom(mapData);
+            break;
+        }
+        case setCodeCommand::DelRoom:
+        {
+            sLog = "delRoomID " + mapData["delRoomID"].toString();
+            emit serverDeletedRoom(mapData["delRoomID"].toInt());
+            break;
+        }
+        case setCodeCommand::CastDelRoom:
+        {
+            //qDebug() << "mapData" << mapData;
+            emit serverCastDelRoom(mapData);
+            break;
+        }
+        case setCodeCommand::CastMess:
+        {
+            //qDebug() << "91 mapData" << mapData;
+            emit serverCast(mapData);
+            break;
+        }
+        case setCodeCommand::Invite:
+        {
+            if (mapData["invitedUserID"].toInt() == 0)
+                sLog = "not exist user " + mapData["invitedUserName"].toString();
+            else {
+                sLog = "to user " + mapData["invitedUserName"].toString() + " send invite";
             }
-            case setCodeCommand::NewRoom:
-            {
-                sLog = "newRoomID " + mapData["newRoomID"].toString();
-                sLog += "newRoomName" + mapData["newRoomName"].toString();
-                emit serverRaspondedNewRoom(mapData);
-                break;
-            }
-            case setCodeCommand::DelRoom:
-            {
-                sLog = "delRoomID " + mapData["delRoomID"].toString();
-                emit serverDeletedRoom(mapData["delRoomID"].toInt());
-                break;
-            }
-            case setCodeCommand::CastDelRoom:
-            {
-                //qDebug() << "mapData" << mapData;
-                emit serverCastDelRoom(mapData);
-                break;
-            }
-            case setCodeCommand::CastMess:
-            {
-                //qDebug() << "91 mapData" << mapData;
-                emit serverCast(mapData);
-                break;
-            }
+            break;
+        }
         }
     }
     qDebug() << sLog;

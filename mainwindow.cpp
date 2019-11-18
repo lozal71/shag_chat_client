@@ -9,6 +9,8 @@ MainWindow::MainWindow(QWidget *parent)
     client = new chatClient();
     dialogAuth = new DialogAuth();
     invite = new DialogInvite();
+    lblWarning = new QLabel();
+    lblUserName = new QLabel();
     connectClientUI();
     ui->leWriteMes->setPlaceholderText("Please, write here...");
     ui->teChat->setReadOnly(true);
@@ -18,7 +20,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete invite;
+    if (!lblWarning) delete lblWarning;
+    if (!lblUserName) delete lblUserName;
+    if (!invite) delete invite;
     delete dialogAuth;
     delete client;
     delete ui;
@@ -73,6 +77,9 @@ void MainWindow::connectClientUI()
 
     connect(client, &chatClient::serverDeletedRoom,
             this, &MainWindow::delRoom);
+
+    connect(client, &chatClient::serverNotifyInvite,
+            this, &MainWindow::showNotifyInvite);
 }
 
 void MainWindow::showWarning(QString sParam)
@@ -104,7 +111,7 @@ void MainWindow::showWarningDisconnect(QString sParam, setDisconnect discParam)
         ui->actionAuth->setEnabled(true);
         break;
     }
-    QLabel *lblWarning = new QLabel(sParam);
+    lblWarning->setText(sParam);
     // помещаем QLabel в mainToolBar
     ui->mainToolBar->addWidget(lblWarning);
 }
@@ -131,13 +138,13 @@ void MainWindow::collectDataSend()
 // показ комнат и имени пользователя
 void MainWindow::showRoomsUserName(QVariantMap mapRoomsID)
 {
+    // авторизация прошла успешно - делаем недоступным меню авторизации
     dialogAuth->authAgain=false;
     ui->actionAuth->setEnabled(false);
-    // создаем объект QLabel и записываем имя клиента
-    QLabel *lblName = new QLabel(client->getName() + " ");
-    // помещаем QLabel в mainToolBar
-    ui->mainToolBar->addWidget(lblName);
-    // разворачиваем map по ключу roomID
+    // в mainToolBar пишем ися пользователя
+    lblUserName->setText(client->getName() + " ");
+    ui->mainToolBar->addWidget(lblUserName);
+    // разворачиваем кнопки-комнаты по ключу roomID
     for (const QString& sRoomID: mapRoomsID.keys()){
         QVariantMap mapRooms = mapRoomsID[sRoomID].toMap();
         // создаем кнопку-комнату
@@ -340,6 +347,16 @@ void MainWindow::showMessToTextEdit(QVariantMap mapMessID)
          ui->teChat->insertPlainText(timeMess + ": from " + senderName + "\n");
          ui->teChat->setAlignment(Qt::AlignLeft);
          ui->teChat->insertPlainText(text + "\n");
+    }
+}
+
+void MainWindow::showNotifyInvite(QVariantMap mapInvitations)
+{
+    ui->pbViewInvite->setEnabled(true);
+    ui->lblNotify->setStyleSheet("font: 14px; color: white; background-color: green");
+    for (const QString& sID: mapInvitations.keys()) {
+        QVariantMap mapInvite = mapInvitations[sID].toMap();
+        ui->cbxNotify->addItem("from " + mapInvite["senderName"].toString());
     }
 }
 

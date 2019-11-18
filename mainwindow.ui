@@ -469,7 +469,7 @@
      <rect>
       <x>20</x>
       <y>60</y>
-      <width>221</width>
+      <width>141</width>
       <height>381</height>
      </rect>
     </property>
@@ -481,7 +481,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>180</x>
       <y>60</y>
       <width>471</width>
       <height>331</height>
@@ -491,8 +491,8 @@
    <widget class="QLineEdit" name="leWriteMes">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>410</y>
+      <x>180</x>
+      <y>400</y>
       <width>351</width>
       <height>31</height>
      </rect>
@@ -504,8 +504,8 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>700</x>
-      <y>410</y>
+      <x>560</x>
+      <y>400</y>
       <width>71</width>
       <height>31</height>
      </rect>
@@ -530,14 +530,58 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>10</y>
+      <x>190</x>
+      <y>20</y>
       <width>101</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
      <string>Messages</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblNotify">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>10</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Notify</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="cbxNotify">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>11</y>
+      <width>241</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbViewInvite">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>669</x>
+      <y>60</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>View Invite</string>
     </property>
    </widget>
   </widget>
