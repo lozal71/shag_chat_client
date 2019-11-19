@@ -120,6 +120,7 @@ void MainWindow::connectClientUI()
 
     connect(client, &chatClient::serverNotifyInvite,
             this, &MainWindow::showNotifyInvite);
+
     connect(ui->cbxNotify, SIGNAL(activated(int)),
             this, SLOT(resetNotifyButton(int)));
 
@@ -128,6 +129,9 @@ void MainWindow::connectClientUI()
 
     connect(client, &chatClient::roomsUpgrated,
             this, &MainWindow::upgradeRoomsUser);
+
+    connect(client, &chatClient::notifyUpgrated,
+            this, &MainWindow::notifyUpgrade);
 }
 
 void MainWindow::showWarning(QString sParam)
@@ -428,7 +432,8 @@ void MainWindow::showAcceptInvite()
     QString sParam;
     QString senderName = inviteActiv->getMap()["senderName"].toString();
     QString roomName = inviteActiv->getMap()["roomName"].toString();
-    sParam = senderName + " invite you in  " + roomName + " Accept?" ;
+    sParam = senderName + " invite you in  " + roomName +
+            +": " +inviteActiv->getMap()["text"].toString() + " Accept?" ;
     QMessageBox quest(QMessageBox::Question,"Question",sParam);
     quest.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
     r=quest.exec();
@@ -437,26 +442,39 @@ void MainWindow::showAcceptInvite()
                                          inviteActiv->getMap()["roomID"].toInt(),
                                          inviteActiv->getMap()["roomName"].toString());
         ui->cbxNotify->removeItem(inviteActiv->getIndex());
-        QMutableListIterator<NotifyButton*> iNotify(listNotifyButton);
-        NotifyButton* currNotify;
-        int invitedID = inviteActiv->getInviteID();
-        inviteActiv->setNull();
-        while(iNotify.hasNext()){
-            currNotify = iNotify.next();
-            if (currNotify->getInviteID() == invitedID){
-                iNotify.remove();
-                delete currNotify;
-                break;
-            }
-        }
-        if (listNotifyButton.isEmpty()){
-            ui->lblNotify->setStyleSheet("font: 14px; color: white; background-color: gray");
 
-        }
         qDebug() << "accept invite";
     }
     else {
         qDebug() << "reject invite";
+    }
+}
+
+void MainWindow::notifyUpgrade(int invitedID)
+{
+    qDebug() << "listNotifyButton" << listNotifyButton;
+    qDebug() << "notifyUpgrade";
+//    for (const QString& sInvitedID: mapInvitedID.keys()){
+        //QVariantMap mapInvite = mapInvitedID[sInvitedID].toMap();
+        //qDebug() << "mapInvite" << mapInvite;
+        //int invitedID = sInvitedID.toInt();
+        QMutableListIterator<NotifyButton*> iNotify(listNotifyButton);
+        NotifyButton* currNotify;
+        while(iNotify.hasNext()){
+            currNotify = iNotify.next();
+            if (currNotify->getInviteID() == invitedID){
+                iNotify.remove();
+                ui->cbxNotify->removeItem(currNotify->getIndex());
+                delete currNotify;
+                break;
+            }
+//        }
+    }
+    qDebug() << "listNotifyButton" << listNotifyButton;
+    if (listNotifyButton.isEmpty()){
+        inviteActiv->setNull();
+        ui->lblNotify->setStyleSheet("font: 14px; color: white; background-color: gray");
+
     }
 }
 

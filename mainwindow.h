@@ -53,6 +53,7 @@ private:
     void showMessToTextEdit(QVariantMap mapMessID);
     void showNotifyInvite(QVariantMap mapInvitations);
     void showAcceptInvite();
+    void notifyUpgrade(int invitedID);
 signals:
     void dataAuthCollected(QString login, QString pass);
     void dataNewRoomCollected(QString newRoomName);

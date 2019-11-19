@@ -29,7 +29,7 @@ public:
     void prepareQueryNewRoom(QString newRoomName);
     void prepareQueryDelRoom(int delRoomID);
     void prepareQueryInvite(QString userName, QString text, int roomID);
-    void prepareQueryAcceptInvite(int inviteID, int roomID, QString roomName);
+    void prepareQueryAcceptInvite(int invitedID, int roomID, QString roomName);
     void sessionClose();
     void setRoomActivName(QString param);
     QString getName();
@@ -51,6 +51,7 @@ signals:
     void authNotCorrected(QString sParam);
     void serverNotifyInvite(QVariantMap mapInvitations);
     void roomsUpgrated(QVariantMap newRoom);
+    void notifyUpgrated(int invitedID);
 };
 
 #endif // CHATCLIENT_H

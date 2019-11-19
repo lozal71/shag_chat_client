@@ -100,7 +100,7 @@ void chatClient::readRespond()
             if (mapData["invitedUserID"].toInt() == 0)
                 sLog = "not exist user " + mapData["invitedUserName"].toString();
             else {
-                sLog = "to user " + mapData["invitedUserName"].toString() + " send invite";
+                sLog = "to user " + mapData["invitedUserName"].toString() + " sended invite";
             }
             break;
         }
@@ -108,6 +108,13 @@ void chatClient::readRespond()
         {
             sLog = "accept invite";
             emit roomsUpgrated(mapData);
+            emit notifyUpgrated(mapData["invitedID"].toInt());
+            break;
+        }
+        case setCodeCommand::questInvite:
+        {
+            sLog = "quest invite";
+            emit serverNotifyInvite(mapData["invite"].toMap());
             break;
         }
         }
@@ -206,7 +213,7 @@ void chatClient::prepareQueryInvite(QString userName, QString text, int roomID)
       QVariantMap mapCommand;
       QVariantMap mapData;
       mapData["roomID"] = roomID;
-      mapData["username"] = userName;
+      mapData["userName"] = userName;
       mapData["textInvite"] = text;
       mapCommand["codeCommand"] = setCodeCommand::Invite;
       mapCommand["joDataInput"] = mapData;
@@ -219,7 +226,7 @@ void chatClient::prepareQueryInvite(QString userName, QString text, int roomID)
       sendQuery();
     }
 
-void chatClient::prepareQueryAcceptInvite(int inviteID, int roomID, QString roomName)
+void chatClient::prepareQueryAcceptInvite(int invitedID, int roomID, QString roomName)
 {
     if (socket->state() == QTcpSocket::UnconnectedState){
         socket->connectToHost("127.0.0.1", 6000);
@@ -230,7 +237,7 @@ void chatClient::prepareQueryAcceptInvite(int inviteID, int roomID, QString room
       mapData["userName"] = client.name;
       mapData["roomName"] = roomName;
       mapData["roomID"] = roomID;
-      mapData["inviteID"] = inviteID;
+      mapData["invitedID"] = invitedID;
       mapCommand["codeCommand"] = setCodeCommand::acceptInvite;
       mapCommand["joDataInput"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
