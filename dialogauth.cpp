@@ -36,18 +36,12 @@ void DialogAuth::fullCbxPasswords()
 
 QString DialogAuth::getLogin()
 {
-    return login;
+    return ui->cbxLogin->currentText();
 }
 
 QString DialogAuth::getPass()
 {
-    return pass;
-}
-
-void DialogAuth::on_buttonBox_accepted()
-{
-    login = ui->cbxLogin->currentText();
-    pass = ui->cbxPass->currentText();
+    return ui->cbxPass->currentText();
 }
 
 void DialogAuth::showWarningAuth(QString sParam)

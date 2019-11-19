@@ -104,6 +104,12 @@ void chatClient::readRespond()
             }
             break;
         }
+        case setCodeCommand::acceptInvite:
+        {
+            sLog = "accept invite";
+            emit roomsUpgrated(mapData);
+            break;
+        }
         }
     }
     qDebug() << sLog;
@@ -197,20 +203,43 @@ void chatClient::prepareQueryInvite(QString userName, QString text, int roomID)
         socket->connectToHost("127.0.0.1", 6000);
     }
     // формирование JSON- документа
-  QVariantMap mapCommand;
-  QVariantMap mapData;
-  mapData["roomID"] = roomID;
-  mapData["username"] = userName;
-  mapData["textInvite"] = text;
-  mapCommand["codeCommand"] = setCodeCommand::Invite;
-  mapCommand["joDataInput"] = mapData;
-  QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
-  //qDebug() << "jdQuery" << jdQuery;
+      QVariantMap mapCommand;
+      QVariantMap mapData;
+      mapData["roomID"] = roomID;
+      mapData["username"] = userName;
+      mapData["textInvite"] = text;
+      mapCommand["codeCommand"] = setCodeCommand::Invite;
+      mapCommand["joDataInput"] = mapData;
+      QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
+      //qDebug() << "jdQuery" << jdQuery;
 
-  // сформировать выходной пакет для отправки на сервер
-  out->setPackage(jdQuery);
-  // послать запрос
-  sendQuery();
+      // сформировать выходной пакет для отправки на сервер
+      out->setPackage(jdQuery);
+      // послать запрос
+      sendQuery();
+    }
+
+void chatClient::prepareQueryAcceptInvite(int inviteID, int roomID, QString roomName)
+{
+    if (socket->state() == QTcpSocket::UnconnectedState){
+        socket->connectToHost("127.0.0.1", 6000);
+    }
+    // формирование JSON- документа
+      QVariantMap mapCommand;
+      QVariantMap mapData;
+      mapData["userName"] = client.name;
+      mapData["roomName"] = roomName;
+      mapData["roomID"] = roomID;
+      mapData["inviteID"] = inviteID;
+      mapCommand["codeCommand"] = setCodeCommand::acceptInvite;
+      mapCommand["joDataInput"] = mapData;
+      QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
+      //qDebug() << "jdQuery" << jdQuery;
+
+      // сформировать выходной пакет для отправки на сервер
+      out->setPackage(jdQuery);
+      // послать запрос
+      sendQuery();
 }
 
 void chatClient::sessionClose()

@@ -24,6 +24,7 @@ SOURCES += \
         dialoginvite.cpp \
         main.cpp \
         mainwindow.cpp \
+        notifybutton.cpp \
         protocol_in.cpp \
         protocol_out.cpp \
         roombutton.cpp
@@ -33,6 +34,7 @@ HEADERS += \
         dialogauth.h \
         dialoginvite.h \
         mainwindow.h \
+        notifybutton.h \
         protocol_in.h \
         protocol_out.h \
         roombutton.h

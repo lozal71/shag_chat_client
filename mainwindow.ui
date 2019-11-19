@@ -514,36 +514,10 @@
      <string>Send</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>20</y>
-      <width>91</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Rooms</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>20</y>
-      <width>101</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Messages</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="lblNotify">
     <property name="geometry">
      <rect>
-      <x>420</x>
+      <x>40</x>
       <y>10</y>
       <width>91</width>
       <height>31</height>
@@ -556,33 +530,23 @@
    <widget class="QComboBox" name="cbxNotify">
     <property name="geometry">
      <rect>
-      <x>530</x>
-      <y>11</y>
+      <x>200</x>
+      <y>10</y>
       <width>241</width>
       <height>31</height>
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pbViewInvite">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
+   <widget class="QWidget" name="verticalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>669</x>
-      <y>60</y>
-      <width>101</width>
+      <x>470</x>
+      <y>10</y>
+      <width>171</width>
       <height>31</height>
      </rect>
     </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>View Invite</string>
-    </property>
+    <layout class="QVBoxLayout" name="vltNotify"/>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">

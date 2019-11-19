@@ -11,15 +11,36 @@ MainWindow::MainWindow(QWidget *parent)
     invite = new DialogInvite();
     lblWarning = new QLabel();
     lblUserName = new QLabel();
+    inviteActiv = new NotifyButton();
     connectClientUI();
     ui->leWriteMes->setPlaceholderText("Please, write here...");
     ui->teChat->setReadOnly(true);
     ui->actionAuth->setEnabled(false);
     flagActionQuit = false;
+    ui->vltNotify->addWidget(inviteActiv);
 }
 
 MainWindow::~MainWindow()
 {
+    if (!listRoomButton.isEmpty()){
+        QMutableListIterator<RoomButton*> iRoom(listRoomButton);
+        RoomButton* currRoom;
+        while (iRoom.hasNext()){
+            currRoom = iRoom.next();
+            iRoom.remove();
+            delete currRoom;
+        }
+    }
+    if (!listNotifyButton.isEmpty()){
+        QMutableListIterator<NotifyButton*> iNotify(listNotifyButton);
+        NotifyButton* currNotify;
+        while(iNotify.hasNext()){
+            currNotify = iNotify.next();
+            iNotify.remove();
+            delete currNotify;
+        }
+    }
+    if (!inviteActiv) delete inviteActiv;
     if (!lblWarning) delete lblWarning;
     if (!lblUserName) delete lblUserName;
     if (!invite) delete invite;
@@ -31,6 +52,25 @@ MainWindow::~MainWindow()
 chatClient* MainWindow::getClient()
 {
     return client;
+}
+
+void MainWindow::resetNotifyButton(int indexInvite)
+{
+    //qDebug() << "indexInvite" << indexInvite;
+    inviteActiv->setEnabled(true);
+    QListIterator<NotifyButton*> iNotify(listNotifyButton);
+    NotifyButton *currNotify = inviteActiv;
+    while (iNotify.hasNext()){
+        currNotify = iNotify.next();
+        if (currNotify->getIndex()==indexInvite){
+            inviteActiv->setParam(currNotify->getIndex(),
+                                  currNotify->getMap(),
+                                  currNotify->getInviteID());
+            //qDebug() << "inviteActiv" << inviteActiv;
+            //qDebug() << "inviteActiv->getMap()" << inviteActiv->getMap();
+            break;
+        }
+    }
 }
 
 
@@ -64,7 +104,7 @@ void MainWindow::connectClientUI()
             client, &chatClient::prepareQueryNewRoom);
 
     connect(client, &chatClient::serverRaspondedNewRoom,
-            this, &MainWindow::upgradeRooms);
+            this, &MainWindow::upgradeRoomsAdmin);
 
     connect(this,&MainWindow::dataDelRoomCollected,
             client, &chatClient::prepareQueryDelRoom);
@@ -80,6 +120,14 @@ void MainWindow::connectClientUI()
 
     connect(client, &chatClient::serverNotifyInvite,
             this, &MainWindow::showNotifyInvite);
+    connect(ui->cbxNotify, SIGNAL(activated(int)),
+            this, SLOT(resetNotifyButton(int)));
+
+    connect(inviteActiv, &NotifyButton::clicked,
+            this, &MainWindow::showAcceptInvite);
+
+    connect(client, &chatClient::roomsUpgrated,
+            this, &MainWindow::upgradeRoomsUser);
 }
 
 void MainWindow::showWarning(QString sParam)
@@ -116,22 +164,17 @@ void MainWindow::showWarningDisconnect(QString sParam, setDisconnect discParam)
     ui->mainToolBar->addWidget(lblWarning);
 }
 
-
 // сбор данных для отправки сообщения
 void MainWindow::collectDataSend()
 {
     // если LineEdit не пусто
     if (!ui->leWriteMes->text().isEmpty()){
-//        // показваем сообщение в TextRdit справа
-//        ui->teChat->setAlignment(Qt::AlignRight);
-//        ui->teChat->insertPlainText( ui->leWriteMes->text() +"\n");
 
         // подготовка запроса - "отправка сообщения"
         client->prepareQuerySendMessage(roomActiv->getRoomID(),
                                         ui->leWriteMes->text());
         // очищаем LineEdit
         ui->leWriteMes->clear();
-        //emit dataSendCollected(roomActiv->getRoomID());
     }
 }
 
@@ -282,13 +325,26 @@ void MainWindow::showCast(QVariantMap mapData)
     //qDebug() << "232" << currRoom->getListCastMess();
 }
 
-void MainWindow::upgradeRooms(QVariantMap mapNewRoom)
+void MainWindow::upgradeRoomsAdmin(QVariantMap mapNewRoom)
 {
     QVariantMap nullMapMess;
     // создаем кнопку-комнату
     RoomButton *btnRoom = new RoomButton(mapNewRoom["newRoomID"].toInt(), "admin",
                                          mapNewRoom["newRoomName"].toString(),
                                          nullMapMess);
+    // клик по комнате - показываем сообщения комнаты
+    connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
+    listRoomButton.append(btnRoom);
+    ui->vltListRooms->addWidget(btnRoom);
+    ui->vltListRooms->update();
+}
+
+void MainWindow::upgradeRoomsUser(QVariantMap mapNewRoom)
+{
+    // создаем кнопку-комнату
+    RoomButton *btnRoom = new RoomButton(mapNewRoom["roomID"].toInt(), "user",
+                                         mapNewRoom["roomName"].toString(),
+                                         mapNewRoom["mess"].toMap());
     // клик по комнате - показываем сообщения комнаты
     connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
     listRoomButton.append(btnRoom);
@@ -352,11 +408,55 @@ void MainWindow::showMessToTextEdit(QVariantMap mapMessID)
 
 void MainWindow::showNotifyInvite(QVariantMap mapInvitations)
 {
-    ui->pbViewInvite->setEnabled(true);
     ui->lblNotify->setStyleSheet("font: 14px; color: white; background-color: green");
     for (const QString& sID: mapInvitations.keys()) {
         QVariantMap mapInvite = mapInvitations[sID].toMap();
         ui->cbxNotify->addItem("from " + mapInvite["senderName"].toString());
+        NotifyButton* btnInvite = new NotifyButton(ui->cbxNotify->currentIndex(),
+                                                   mapInvite, sID.toInt());
+        listNotifyButton.append(btnInvite);
+        //qDebug() << "listNotifyButton" << listNotifyButton;
+
+     }
+
+}
+
+void MainWindow::showAcceptInvite()
+{
+    qDebug() << "showAcceptInvite";
+    int r;
+    QString sParam;
+    QString senderName = inviteActiv->getMap()["senderName"].toString();
+    QString roomName = inviteActiv->getMap()["roomName"].toString();
+    sParam = senderName + " invite you in  " + roomName + " Accept?" ;
+    QMessageBox quest(QMessageBox::Question,"Question",sParam);
+    quest.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
+    r=quest.exec();
+    if(r == QMessageBox::Yes) {
+        client->prepareQueryAcceptInvite(inviteActiv->getInviteID(),
+                                         inviteActiv->getMap()["roomID"].toInt(),
+                                         inviteActiv->getMap()["roomName"].toString());
+        ui->cbxNotify->removeItem(inviteActiv->getIndex());
+        QMutableListIterator<NotifyButton*> iNotify(listNotifyButton);
+        NotifyButton* currNotify;
+        int invitedID = inviteActiv->getInviteID();
+        inviteActiv->setNull();
+        while(iNotify.hasNext()){
+            currNotify = iNotify.next();
+            if (currNotify->getInviteID() == invitedID){
+                iNotify.remove();
+                delete currNotify;
+                break;
+            }
+        }
+        if (listNotifyButton.isEmpty()){
+            ui->lblNotify->setStyleSheet("font: 14px; color: white; background-color: gray");
+
+        }
+        qDebug() << "accept invite";
+    }
+    else {
+        qDebug() << "reject invite";
     }
 }
 

@@ -9,7 +9,7 @@
 #include <dialogauth.h>
 #include <QInputDialog>
 #include "dialoginvite.h"
-
+#include "notifybutton.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {class MainWindow;}
@@ -28,11 +28,15 @@ public:
     DialogInvite *invite;
     QLabel *lblWarning;
     QLabel *lblUserName;
+public slots:
+    void resetNotifyButton(int indexInvite);
 private:
     Ui::MainWindow *ui;
     chatClient * client;
     RoomButton* roomActiv;
+    NotifyButton *inviteActiv;
     QList<RoomButton*> listRoomButton;
+    QList<NotifyButton*> listNotifyButton;
     bool flagActionQuit;
     void connectClientUI();
     void showWarningDisconnect(QString sParam, setDisconnect discParam);
@@ -43,10 +47,12 @@ private:
     void showMessage();
     void showCastDelRoom(QVariantMap mapData);
     void showCast(QVariantMap mapData);
-    void upgradeRooms(QVariantMap mapNewRoom);
+    void upgradeRoomsAdmin(QVariantMap mapNewRoom);
+    void upgradeRoomsUser(QVariantMap mapNewRoom);
     void delRoom(int delRoomID);
     void showMessToTextEdit(QVariantMap mapMessID);
     void showNotifyInvite(QVariantMap mapInvitations);
+    void showAcceptInvite();
 signals:
     void dataAuthCollected(QString login, QString pass);
     void dataNewRoomCollected(QString newRoomName);

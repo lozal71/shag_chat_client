@@ -27,14 +27,10 @@ public:
     bool flagExit;
     void showWarningAuth(QString sParam);
 private slots:
-    void on_buttonBox_accepted();
-
     void on_buttonBox_rejected();
 
 private:
     Ui::DialogAuth *ui;
-    QString login;
-    QString pass;
     void fullCbxLogins();
     void fullCbxPasswords();
 
