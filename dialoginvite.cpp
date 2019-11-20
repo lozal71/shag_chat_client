@@ -7,8 +7,8 @@ DialogInvite::DialogInvite(QWidget *parent) :
     ui(new Ui::DialogInvite)
 {
     ui->setupUi(this);
-    fullCbxUserName();
-    fullCbxTextInvite();
+//    fullCbxUserName();
+//    fullCbxTextInvite();
 }
 
 DialogInvite::~DialogInvite()
@@ -26,16 +26,14 @@ QString DialogInvite::getTextInvite()
     return ui->cbxTextInvite->currentText();
 }
 
-void DialogInvite::fullCbxUserName()
+void DialogInvite::fullCbxUserName(QStringList listUsers)
 {
-    ui->cbxUserName->addItem("user1");
-    ui->cbxUserName->addItem("user2");
-    ui->cbxUserName->addItem("user3");
+    ui->cbxUserName->clear();
+    ui->cbxUserName->addItems(listUsers);
 }
 
-void DialogInvite::fullCbxTextInvite()
+void DialogInvite::fullCbxTextInvite(QStringList listText)
 {
-    ui->cbxTextInvite->addItem("text1");
-    ui->cbxTextInvite->addItem("tex2");
-    ui->cbxTextInvite->addItem("text3");
+    ui->cbxTextInvite->clear();
+    ui->cbxTextInvite->addItems(listText);
 }

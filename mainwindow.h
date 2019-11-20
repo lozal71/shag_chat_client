@@ -54,6 +54,7 @@ private:
     void showNotifyInvite(QVariantMap mapInvitations);
     void showAcceptInvite();
     void notifyUpgrade(int inviteID);
+    void showDialogDelUser(QVariantMap mapUsers, int roomID);
 signals:
     void dataAuthCollected(QString login, QString pass);
     void dataNewRoomCollected(QString newRoomName);
@@ -65,6 +66,7 @@ private slots:
     void on_actionDeleteRoom_triggered();
 
     void on_actionInvite_triggered();
+    void on_actionDelete_user_triggered();
 };
 
 #endif // MAINWINDOW_H

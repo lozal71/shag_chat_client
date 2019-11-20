@@ -32,7 +32,7 @@ void chatClient::readRespond()
 {
     // получаем JSON-документ из сокета
     QJsonDocument jdTemp = in->receiveJSONdoc(socket);
-    //qDebug() << "jdTemp" << jdTemp;
+    qDebug() << "jdTemp" << jdTemp;
     QString sLog;
     if (in->isError()){
         sLog = "Problem: error massage";
@@ -126,10 +126,18 @@ void chatClient::readRespond()
             emit notifyUpgrated(mapData["inviteID"].toInt());
             break;
         }
-        case setCodeCommand::notifyRejectInvite:
+        case setCodeCommand::userInRoom:
         {
-            sLog = " notify reject invite";
-            emit showResultInvite(mapData["textReject"].toString());
+            sLog = "userInRoom";
+            qDebug() << mapData["users"].toMap();
+            emit mapUsersReceived(mapData["users"].toMap(),
+                                    mapData["roomID"].toInt());
+            break;
+        }
+        case setCodeCommand::delUser:
+        {
+            sLog = "delete user";
+            emit serverCast(mapData);
             break;
         }
         }
@@ -274,6 +282,48 @@ void chatClient::prepareQueryRejectInvite(int inviteID)
       QVariantMap mapData;
       mapData["inviteID"] = inviteID;
       mapCommand["codeCommand"] = setCodeCommand::rejectInvite;
+      mapCommand["joDataInput"] = mapData;
+      QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
+      //qDebug() << "jdQuery" << jdQuery;
+
+      // сформировать выходной пакет для отправки на сервер
+      out->setPackage(jdQuery);
+      // послать запрос
+      sendQuery();
+}
+
+void chatClient::prepareQueryUserInRoom(int roomID)
+{
+    if (socket->state() == QTcpSocket::UnconnectedState){
+        socket->connectToHost("127.0.0.1", 6000);
+    }
+    // формирование JSON- документа
+      QVariantMap mapCommand;
+      QVariantMap mapData;
+      mapData["roomID"] = roomID;
+      mapCommand["codeCommand"] = setCodeCommand::userInRoom;
+      mapCommand["joDataInput"] = mapData;
+      QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
+      //qDebug() << "jdQuery" << jdQuery;
+
+      // сформировать выходной пакет для отправки на сервер
+      out->setPackage(jdQuery);
+      // послать запрос
+      sendQuery();
+}
+
+void chatClient::prepareQueryDelUser(int userID, int roomID, QString text)
+{
+    if (socket->state() == QTcpSocket::UnconnectedState){
+        socket->connectToHost("127.0.0.1", 6000);
+    }
+    // формирование JSON- документа
+      QVariantMap mapCommand;
+      QVariantMap mapData;
+      mapData["roomID"] = roomID;
+      mapData["userID"] = userID;
+      mapData["text"] = text;
+      mapCommand["codeCommand"] = setCodeCommand::delUser;
       mapCommand["joDataInput"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;

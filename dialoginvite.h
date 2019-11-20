@@ -23,10 +23,11 @@ public:
     ~DialogInvite();
     QString getUserName();
     QString getTextInvite();
+    void fullCbxUserName(QStringList listUsers);
+    void fullCbxTextInvite(QStringList listText);
 private:
     Ui::DialogInvite *ui;
-    void fullCbxUserName();
-    void fullCbxTextInvite();
+
 };
 
 #endif // DIALOGINVITE_H

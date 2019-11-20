@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>798</width>
+    <width>675</width>
     <height>531</height>
    </rect>
   </property>
@@ -554,7 +554,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>798</width>
+     <width>675</width>
      <height>30</height>
     </rect>
    </property>
@@ -573,9 +573,13 @@
      <string>Tools</string>
     </property>
     <addaction name="actionAuth"/>
+    <addaction name="separator"/>
     <addaction name="actionNewRoom"/>
-    <addaction name="actionInvite"/>
     <addaction name="actionDeleteRoom"/>
+    <addaction name="separator"/>
+    <addaction name="actionInvite"/>
+    <addaction name="actionDelete_user"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <addaction name="menuStart"/>
@@ -612,6 +616,11 @@
   <action name="actionInvite">
    <property name="text">
     <string>Invite user</string>
+   </property>
+  </action>
+  <action name="actionDelete_user">
+   <property name="text">
+    <string>Delete user</string>
    </property>
   </action>
  </widget>

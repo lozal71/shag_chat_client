@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->leWriteMes->setPlaceholderText("Please, write here...");
     ui->teChat->setReadOnly(true);
     ui->actionAuth->setEnabled(false);
+    ui->leWriteMes->setEnabled(false);
     flagActionQuit = false;
     ui->vltNotify->addWidget(inviteActiv);
 }
@@ -134,6 +135,9 @@ void MainWindow::connectClientUI()
 
     connect(client, &chatClient::showResultInvite,
             this, &MainWindow::showWarning);
+
+    connect(client, &chatClient::mapUsersReceived,
+            this, &MainWindow::showDialogDelUser);
 }
 
 void MainWindow::showWarning(QString sParam)
@@ -218,6 +222,7 @@ void MainWindow::showRoomsUserName(QVariantMap mapRoomsID)
 void MainWindow::showMessage()
 {
     ui->pbSend->setEnabled(true);
+    ui->leWriteMes->setEnabled(true);
     ui->teChat->clear();
     // определяем, какая кнопка нажата и назначаем ее активной
     this->roomActiv = static_cast<RoomButton*>(sender());
@@ -307,7 +312,7 @@ void MainWindow::showCastDelRoom(QVariantMap mapData)
 
 void MainWindow::showCast(QVariantMap mapData)
 {
-    //qDebug() << "showCast";
+    qDebug() << "showCast";
     int roomID = mapData["roomID"].toInt();
     QListIterator<RoomButton*> iRoom(listRoomButton);
     RoomButton* currRoom = roomActiv;
@@ -456,29 +461,46 @@ void MainWindow::showAcceptInvite()
 
 void MainWindow::notifyUpgrade(int inviteID)
 {
-    qDebug() << "listNotifyButton" << listNotifyButton;
-    qDebug() << "notifyUpgrade";
-//    for (const QString& sInvitedID: mapInvitedID.keys()){
-        //QVariantMap mapInvite = mapInvitedID[sInvitedID].toMap();
-        //qDebug() << "mapInvite" << mapInvite;
-        //int invitedID = sInvitedID.toInt();
-        QMutableListIterator<NotifyButton*> iNotify(listNotifyButton);
-        NotifyButton* currNotify;
-        while(iNotify.hasNext()){
-            currNotify = iNotify.next();
-            if (currNotify->getInviteID() == inviteID){
-                iNotify.remove();
-                ui->cbxNotify->removeItem(currNotify->getIndex());
-                delete currNotify;
-                break;
-            }
-//        }
+    QMutableListIterator<NotifyButton*> iNotify(listNotifyButton);
+    NotifyButton* currNotify;
+    while(iNotify.hasNext()){
+        currNotify = iNotify.next();
+        if (currNotify->getInviteID() == inviteID){
+            iNotify.remove();
+            ui->cbxNotify->removeItem(currNotify->getIndex());
+            delete currNotify;
+            break;
+        }
     }
-    qDebug() << "listNotifyButton" << listNotifyButton;
     if (listNotifyButton.isEmpty()){
         inviteActiv->setNull();
         ui->lblNotify->setStyleSheet("font: 14px; color: white; background-color: gray");
 
+    }
+}
+
+void MainWindow::showDialogDelUser(QVariantMap mapUsers, int roomID)
+{
+    QStringList users;
+    users.clear();
+    for (const QString& sUserID: mapUsers.keys()) {
+        users.append(mapUsers[sUserID].toString());
+    }
+    invite->fullCbxUserName(users);
+    QStringList textList;
+    textList.clear();
+    textList << "text1" << "text2" << "text3";
+    invite->fullCbxTextInvite(textList);
+    int userID = 0;
+    QString text = invite->getTextInvite();
+    if(invite->exec() == QDialog::Accepted){
+        for (const QString& sUserID: mapUsers.keys()) {
+            if (mapUsers[sUserID].toString() == invite->getUserName()){
+               userID =  sUserID.toInt();
+               break;
+            }
+        }
+        client->prepareQueryDelUser(userID, roomID, text);
     }
 }
 
@@ -546,6 +568,14 @@ void MainWindow::on_actionDeleteRoom_triggered()
 void MainWindow::on_actionInvite_triggered()
 {
     if (roomActiv->getRole() == "admin"){
+        QStringList users;
+        users.clear();
+        users << "user1" << "user2" << "user3";
+        invite->fullCbxUserName(users);
+        QStringList text;
+        text.clear();
+        text << "text1" << "text2" << "text3";
+        invite->fullCbxTextInvite(text);
         if(invite->exec() == QDialog::Accepted){
             if (client->getName() == invite->getUserName()){
                 showWarning("Нельзя приглашать самого себя!!! ");
@@ -556,6 +586,16 @@ void MainWindow::on_actionInvite_triggered()
                                            this->roomActiv->getRoomID());
             }
         }
+    }
+    else{
+        showWarning("You are not admin of room: " + roomActiv->getRoomName());
+    }
+}
+
+void MainWindow::on_actionDelete_user_triggered()
+{
+    if (roomActiv->getRole() == "admin"){
+        client->prepareQueryUserInRoom(roomActiv->getRoomID());
     }
     else{
         showWarning("You are not admin of room: " + roomActiv->getRoomName());
