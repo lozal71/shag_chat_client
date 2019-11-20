@@ -9,7 +9,7 @@
 enum setDisconnect {fromServer, fromClient, undefined};
 enum setCodeCommand {Auth = 1, Send = 2, NewRoom = 3, DelRoom = 4,
                      CastDelRoom = 5, CastMess = 6, Invite = 7, questInvite = 8,
-                    acceptInvite = 9};
+                     acceptInvite = 9, rejectInvite = 10, notifyRejectInvite = 11};
 
 struct clientData {
     int id;
@@ -29,7 +29,8 @@ public:
     void prepareQueryNewRoom(QString newRoomName);
     void prepareQueryDelRoom(int delRoomID);
     void prepareQueryInvite(QString userName, QString text, int roomID);
-    void prepareQueryAcceptInvite(int invitedID, int roomID, QString roomName);
+    void prepareQueryAcceptInvite(int inviteID, int roomID, QString roomName);
+    void prepareQueryRejectInvite(int inviteID);
     void sessionClose();
     void setRoomActivName(QString param);
     QString getName();
@@ -52,6 +53,7 @@ signals:
     void serverNotifyInvite(QVariantMap mapInvitations);
     void roomsUpgrated(QVariantMap newRoom);
     void notifyUpgrated(int invitedID);
+    void showResultInvite(QString sParam);
 };
 
 #endif // CHATCLIENT_H

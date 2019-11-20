@@ -73,7 +73,6 @@ void MainWindow::resetNotifyButton(int indexInvite)
     }
 }
 
-
 void MainWindow::connectClientUI()
 {
     // данные для Авторизации собраны - клиент готовит запрос на Авторизацию
@@ -132,6 +131,9 @@ void MainWindow::connectClientUI()
 
     connect(client, &chatClient::notifyUpgrated,
             this, &MainWindow::notifyUpgrade);
+
+    connect(client, &chatClient::showResultInvite,
+            this, &MainWindow::showWarning);
 }
 
 void MainWindow::showWarning(QString sParam)
@@ -427,7 +429,7 @@ void MainWindow::showNotifyInvite(QVariantMap mapInvitations)
 
 void MainWindow::showAcceptInvite()
 {
-    qDebug() << "showAcceptInvite";
+    //qDebug() << "showAcceptInvite";
     int r;
     QString sParam;
     QString senderName = inviteActiv->getMap()["senderName"].toString();
@@ -443,14 +445,16 @@ void MainWindow::showAcceptInvite()
                                          inviteActiv->getMap()["roomName"].toString());
         ui->cbxNotify->removeItem(inviteActiv->getIndex());
 
-        qDebug() << "accept invite";
+        //qDebug() << "accept invite";
     }
     else {
+        client->prepareQueryRejectInvite(inviteActiv->getInviteID());
+        ui->cbxNotify->removeItem(inviteActiv->getIndex());
         qDebug() << "reject invite";
     }
 }
 
-void MainWindow::notifyUpgrade(int invitedID)
+void MainWindow::notifyUpgrade(int inviteID)
 {
     qDebug() << "listNotifyButton" << listNotifyButton;
     qDebug() << "notifyUpgrade";
@@ -462,7 +466,7 @@ void MainWindow::notifyUpgrade(int invitedID)
         NotifyButton* currNotify;
         while(iNotify.hasNext()){
             currNotify = iNotify.next();
-            if (currNotify->getInviteID() == invitedID){
+            if (currNotify->getInviteID() == inviteID){
                 iNotify.remove();
                 ui->cbxNotify->removeItem(currNotify->getIndex());
                 delete currNotify;
@@ -543,9 +547,14 @@ void MainWindow::on_actionInvite_triggered()
 {
     if (roomActiv->getRole() == "admin"){
         if(invite->exec() == QDialog::Accepted){
-            client->prepareQueryInvite(invite->getUserName(),
-                                       invite->getTextInvite(),
-                                       this->roomActiv->getRoomID());
+            if (client->getName() == invite->getUserName()){
+                showWarning("Нельзя приглашать самого себя!!! ");
+            }
+            else {
+                client->prepareQueryInvite(invite->getUserName(),
+                                           invite->getTextInvite(),
+                                           this->roomActiv->getRoomID());
+            }
         }
     }
     else{
