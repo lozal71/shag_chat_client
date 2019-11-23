@@ -6,17 +6,18 @@
 #include "protocol_out.h"
 #include <QDateTime>
 
+enum setUpdateUsers {addUser, removeUser};
 enum setDisconnect {fromServer, fromClient, undefined};
 enum setCodeCommand {Auth = 1, Send = 2, NewRoom = 3, DelRoom = 4,
                      CastDelRoom = 5, CastMess = 6, Invite = 7, questInvite = 8,
-                     acceptInvite = 9, rejectInvite = 10, delUser = 11,
-                     userInRoom = 12};
+                     acceptInvite = 9, rejectInvite = 10, delUser = 11, updateUsers = 12 };
 
 struct clientData {
     int id;
     QString name;
 };
 
+static setCodeCommand comm;
 
 class chatClient : public QObject
 {
@@ -32,7 +33,6 @@ public:
     void prepareQueryInvite(QString userName, QString text, int roomID);
     void prepareQueryAcceptInvite(int inviteID, int roomID, QString roomName);
     void prepareQueryRejectInvite(int inviteID);
-    void prepareQueryUserInRoom(int roomID);
     void prepareQueryDelUser(int userID, int roomID, QString text);
     void sessionClose();
     void setRoomActivName(QString param);
@@ -47,6 +47,7 @@ private:
 signals:
     void sessionClosed(QString sParam, setDisconnect discParam);
     void serverRespondedAuth(QVariantMap mapRooms);
+    void usersUpdated(QVariantMap mapData);
     void serverRaspondedNewRoom(QVariantMap mapNewRoom);
     void serverCastDelRoom(QVariantMap mapData);
     void serverCast(QVariantMap mapData);
@@ -54,7 +55,7 @@ signals:
     void noConnect(QString sParam, setDisconnect discParam);
     void authNotCorrected(QString sParam);
     void serverNotifyInvite(QVariantMap mapInvitations);
-    void roomsUpgrated(QVariantMap newRoom);
+    void RoomsUserUpgrate(QVariantMap newRoom);
     void notifyUpgrated(int invitedID);
     void showResultInvite(QString sParam);
     void mapUsersReceived(QVariantMap mapUsers, int roomID);

@@ -127,7 +127,7 @@ void MainWindow::connectClientUI()
     connect(inviteActiv, &NotifyButton::clicked,
             this, &MainWindow::showAcceptInvite);
 
-    connect(client, &chatClient::roomsUpgrated,
+    connect(client, &chatClient::RoomsUserUpgrate,
             this, &MainWindow::upgradeRoomsUser);
 
     connect(client, &chatClient::notifyUpgrated,
@@ -135,9 +135,8 @@ void MainWindow::connectClientUI()
 
     connect(client, &chatClient::showResultInvite,
             this, &MainWindow::showWarning);
-
-    connect(client, &chatClient::mapUsersReceived,
-            this, &MainWindow::showDialogDelUser);
+    connect(client, &chatClient::usersUpdated,
+            this, &MainWindow::searchRoomButton);
 }
 
 void MainWindow::showWarning(QString sParam)
@@ -204,7 +203,8 @@ void MainWindow::showRoomsUserName(QVariantMap mapRoomsID)
         RoomButton *btnRoom = new RoomButton(mapRooms["roomID"].toInt(),
                                              mapRooms["role"].toString(),
                                              mapRooms["roomName"].toString(),
-                                             mapRooms["mess"].toMap());
+                                             mapRooms["mess"].toMap(),
+                                             mapRooms["users"].toMap());
         // клик по комнате - показ сообщения комнаты
         connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
         // собираем список кнопок-комнат
@@ -227,7 +227,7 @@ void MainWindow::showMessage()
     // определяем, какая кнопка нажата и назначаем ее активной
     this->roomActiv = static_cast<RoomButton*>(sender());
     // определяем сообщения в активной комнате
-    QVariantMap mapAllMess = roomActiv->getMapUserMess();
+    QVariantMap mapAllMess = roomActiv->getMapMess();
     // выделяем цветом активную комнату
     this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
     // показываем прочитанные сообщения
@@ -339,10 +339,11 @@ void MainWindow::showCast(QVariantMap mapData)
 void MainWindow::upgradeRoomsAdmin(QVariantMap mapNewRoom)
 {
     QVariantMap nullMapMess;
+    QVariantMap nullMapUsers;
     // создаем кнопку-комнату
     RoomButton *btnRoom = new RoomButton(mapNewRoom["newRoomID"].toInt(), "admin",
                                          mapNewRoom["newRoomName"].toString(),
-                                         nullMapMess);
+                                         nullMapMess, nullMapUsers);
     // клик по комнате - показываем сообщения комнаты
     connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
     listRoomButton.append(btnRoom);
@@ -355,7 +356,8 @@ void MainWindow::upgradeRoomsUser(QVariantMap mapNewRoom)
     // создаем кнопку-комнату
     RoomButton *btnRoom = new RoomButton(mapNewRoom["roomID"].toInt(), "user",
                                          mapNewRoom["roomName"].toString(),
-                                         mapNewRoom["mess"].toMap());
+                                         mapNewRoom["mess"].toMap(),
+                                         mapNewRoom["users"].toMap());
     // клик по комнате - показываем сообщения комнаты
     connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
     listRoomButton.append(btnRoom);
@@ -455,7 +457,7 @@ void MainWindow::showAcceptInvite()
     else {
         client->prepareQueryRejectInvite(inviteActiv->getInviteID());
         ui->cbxNotify->removeItem(inviteActiv->getIndex());
-        qDebug() << "reject invite";
+        //qDebug() << "reject invite";
     }
 }
 
@@ -493,6 +495,7 @@ void MainWindow::showDialogDelUser(QVariantMap mapUsers, int roomID)
     invite->fullCbxTextInvite(textList);
     int userID = 0;
     QString text = invite->getTextInvite();
+    invite->setModal(false);
     if(invite->exec() == QDialog::Accepted){
         for (const QString& sUserID: mapUsers.keys()) {
             if (mapUsers[sUserID].toString() == invite->getUserName()){
@@ -501,6 +504,28 @@ void MainWindow::showDialogDelUser(QVariantMap mapUsers, int roomID)
             }
         }
         client->prepareQueryDelUser(userID, roomID, text);
+    }
+}
+
+void MainWindow::searchRoomButton(QVariantMap mapData)
+{
+    qDebug() << "512 senderName" << mapData["senderName"].toString();
+    qDebug() << "roomID" << mapData["roomID"].toInt();
+    QListIterator<RoomButton*> iRoom(listRoomButton);
+    RoomButton* currentRoom = roomActiv;
+    while (iRoom.hasNext()) {
+        currentRoom = iRoom.next();
+        if (currentRoom->getRoomID() == mapData["roomID"].toInt()){
+            if (mapData["updateParam"].toInt() == int(setUpdateUsers::addUser)){
+                currentRoom->getMapUsers().insert(mapData["userID"].toString(),
+                                                   mapData["senderName"].toString());
+            }
+            else {
+                currentRoom->getMapUsers().remove(mapData["userID"].toString());
+            }
+            showCast(mapData);
+            break;
+        }
     }
 }
 
@@ -518,7 +543,7 @@ void MainWindow::on_actionNewRoom_triggered()
                                              QLineEdit::Normal, "Input name here", &ok);
     if (ok && !roomName.isEmpty()){
         emit dataNewRoomCollected(roomName);
-        qDebug() << "roomName" << roomName;
+        //qDebug() << "roomName" << roomName;
     }
 
 }
@@ -595,7 +620,9 @@ void MainWindow::on_actionInvite_triggered()
 void MainWindow::on_actionDelete_user_triggered()
 {
     if (roomActiv->getRole() == "admin"){
-        client->prepareQueryUserInRoom(roomActiv->getRoomID());
+        showDialogDelUser(roomActiv->getMapUsers(), roomActiv->getRoomID());
+        //client->prepareQueryDelUser(roomActiv->getRoomID());
+        //client->prepareQueryUserInRoom(roomActiv->getRoomID());
     }
     else{
         showWarning("You are not admin of room: " + roomActiv->getRoomName());

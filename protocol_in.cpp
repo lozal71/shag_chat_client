@@ -6,7 +6,7 @@ protocolIn::protocolIn(){
 
  QJsonDocument protocolIn::receiveJSONdoc(QTcpSocket *socket)
 {
-     qDebug() << "receiveJSONdoc";
+    // qDebug() << "receiveJSONdoc";
     QJsonDocument jdTemp;
     flag_error = false;
     // если в сокете меньше, чем 4 байта
@@ -48,7 +48,7 @@ protocolIn::protocolIn(){
         //qDebug() << "buffer в конце " << buffer;
         QString sBuffer(baBuffer);
         jdTemp = QJsonDocument::fromJson(sBuffer.toUtf8());
-         qDebug() << "jdTemp " <<jdTemp;
+        // qDebug() << "jdTemp " <<jdTemp;
     }
     return jdTemp;
  }

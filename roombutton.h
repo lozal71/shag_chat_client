@@ -9,11 +9,12 @@ class RoomButton: public QPushButton
 {
     Q_OBJECT
 public:
-    RoomButton(int ID, QString role, QString sName, QVariantMap mapUserMess);
+    RoomButton(int ID, QString role, QString sName, QVariantMap mapMess, QVariantMap mapUsers);
     int getRoomID();
     QString getRole();
     QString getRoomName();
-    QVariantMap getMapUserMess();
+    QVariantMap getMapMess();
+    QVariantMap getMapUsers();
     void catchRoomClick();
     void setMapMess(QVariantMap mapParam);
     void debugMapMess(QVariantMap mapMess);
@@ -25,6 +26,7 @@ private:
         QString role;
         QString name;
         QVariantMap mapMess;
+        QVariantMap mapUsers;
         QList<QVariantMap> listCastMess;
     } room;
 

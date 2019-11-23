@@ -1,6 +1,7 @@
 #include "chatclient.h"
 
 
+
 chatClient::chatClient()
 {
     socket = new QTcpSocket();
@@ -32,14 +33,15 @@ void chatClient::readRespond()
 {
     // получаем JSON-документ из сокета
     QJsonDocument jdTemp = in->receiveJSONdoc(socket);
-    qDebug() << "jdTemp" << jdTemp;
+    //qDebug() << "35 jdTemp" << jdTemp;
     QString sLog;
     if (in->isError()){
         sLog = "Problem: error massage";
+        qDebug() << sLog;
     }
     else{
         QJsonObject joTemp = jdTemp.object();
-        //qDebug() << "joTemp" << joTemp;
+        //qDebug() << "44 joTemp" << joTemp;
         QVariantMap mapCommand =joTemp.toVariantMap();
         //qDebug() << "mapCommand" << mapCommand;
         QVariantMap mapData =  mapCommand["joDataInput"].toMap();
@@ -47,6 +49,9 @@ void chatClient::readRespond()
         switch (setCodeCommand(mapCommand["codeCommand"].toInt())) {
         case setCodeCommand::Auth:
         {
+            comm = Auth;
+            sLog = "Auth";
+            qDebug() << sLog;
             this->client.id = mapData["userID"].toInt();
             if (client.id ==0){
                  sLog = "Problem: login or password is not correct. Try again?";
@@ -54,7 +59,7 @@ void chatClient::readRespond()
             }
             else {
                 sLog = "Authorization is success:";
-                QVariantMap  mapUserName= mapData.first().toMap();
+                //QVariantMap  mapUserName= mapData.first().toMap();
                 this->client.id = mapData["userID"].toInt();
                 this->client.name = mapData["userName"].toString();
                 emit serverRespondedAuth(mapData["rooms"].toMap());
@@ -66,37 +71,50 @@ void chatClient::readRespond()
         }
         case setCodeCommand::Send:
         {
+            comm = Send;
             sLog = "sendResult ";
+            qDebug() << sLog;
             emit serverCast(mapData);
             break;
         }
         case setCodeCommand::NewRoom:
         {
+            comm = NewRoom;
             sLog = "newRoomID " + mapData["newRoomID"].toString();
             sLog += "newRoomName" + mapData["newRoomName"].toString();
+            qDebug() << sLog;
             emit serverRaspondedNewRoom(mapData);
             break;
         }
         case setCodeCommand::DelRoom:
         {
+            comm = DelRoom;
             sLog = "delRoomID " + mapData["delRoomID"].toString();
+            qDebug() << sLog;
             emit serverDeletedRoom(mapData["delRoomID"].toInt());
             break;
         }
         case setCodeCommand::CastDelRoom:
         {
+            comm = CastDelRoom;
+            sLog = "cast del room";
+            qDebug() << sLog;
             //qDebug() << "mapData" << mapData;
             emit serverCastDelRoom(mapData);
             break;
         }
         case setCodeCommand::CastMess:
         {
+            comm = CastMess;
+            sLog = "cast mess";
+            qDebug() << sLog;
             //qDebug() << "91 mapData" << mapData;
             emit serverCast(mapData);
             break;
         }
         case setCodeCommand::Invite:
         {
+            comm = Invite;
             if (mapData["invitedUserID"].toInt() == 0)
                 sLog = "not exist user " + mapData["invitedUserName"].toString();
             else if (mapData["invitedUserID"].toInt() == -1)
@@ -105,44 +123,55 @@ void chatClient::readRespond()
                 sLog = "to user " + mapData["invitedUserName"].toString() + " sended invite";
             }
             emit showResultInvite(sLog);
+            qDebug() << sLog;
             break;
         }
         case setCodeCommand::acceptInvite:
         {
+            comm = acceptInvite;
             sLog = "accept invite";
-            emit roomsUpgrated(mapData);
+            qDebug() << sLog;
+            emit RoomsUserUpgrate(mapData);
             emit notifyUpgrated(mapData["inviteID"].toInt());
             break;
         }
         case setCodeCommand::questInvite:
         {
+            comm = questInvite;
             sLog = "quest invite";
+            qDebug() << sLog;
             emit serverNotifyInvite(mapData["invite"].toMap());
             break;
         }
         case setCodeCommand::rejectInvite:
         {
+            comm = rejectInvite;
             sLog = "reject invite";
+            qDebug() << sLog;
             emit notifyUpgrated(mapData["inviteID"].toInt());
-            break;
-        }
-        case setCodeCommand::userInRoom:
-        {
-            sLog = "userInRoom";
-            qDebug() << mapData["users"].toMap();
-            emit mapUsersReceived(mapData["users"].toMap(),
-                                    mapData["roomID"].toInt());
             break;
         }
         case setCodeCommand::delUser:
         {
+            comm = delUser;
             sLog = "delete user";
+            qDebug() << sLog;
             emit serverCast(mapData);
+            mapData["updateParam"] = removeUser;
+            emit usersUpdated(mapData);
+            break;
+        }
+        case setCodeCommand::updateUsers:
+        {
+            comm = updateUsers;
+            sLog = "updateUsers";
+            qDebug() << sLog;
+            emit usersUpdated(mapData);
             break;
         }
         }
     }
-    qDebug() << sLog;
+
 }
 
 void chatClient::prepareQueryAuth(QString login, QString pass)
@@ -159,10 +188,11 @@ void chatClient::prepareQueryAuth(QString login, QString pass)
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
-
+    comm = Auth;
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
     // послать запрос
+    qDebug() << "prepareQueryAuth";
     sendQuery();
 }
 
@@ -180,10 +210,11 @@ void chatClient::prepareQuerySendMessage(int roomID, QString text)
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
-
+    comm = Send;
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
     // послать запрос
+    qDebug() << "prepareQuerySendMessage";
     sendQuery();
 }
 
@@ -200,10 +231,11 @@ void chatClient::prepareQueryNewRoom(QString newRoomName)
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
-
+    comm = NewRoom;
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
     // послать запрос
+    qDebug() << "prepareQueryNewRoom";
     sendQuery();
 }
 
@@ -217,6 +249,7 @@ void chatClient::prepareQueryDelRoom(int delRoomID)
     QVariantMap mapData;
     mapData["delRoomID"] = delRoomID;
     mapCommand["codeCommand"] = setCodeCommand::DelRoom;
+    comm = DelRoom;
     mapCommand["joDataInput"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
@@ -224,6 +257,7 @@ void chatClient::prepareQueryDelRoom(int delRoomID)
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
     // послать запрос
+    qDebug() << "prepareQueryDelRoom";
     sendQuery();
 }
 
@@ -239,6 +273,7 @@ void chatClient::prepareQueryInvite(QString userName, QString text, int roomID)
       mapData["userName"] = userName;
       mapData["textInvite"] = text;
       mapCommand["codeCommand"] = setCodeCommand::Invite;
+      comm = Invite;
       mapCommand["joDataInput"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;
@@ -246,6 +281,7 @@ void chatClient::prepareQueryInvite(QString userName, QString text, int roomID)
       // сформировать выходной пакет для отправки на сервер
       out->setPackage(jdQuery);
       // послать запрос
+      qDebug() << "prepareQueryInvite";
       sendQuery();
     }
 
@@ -262,6 +298,7 @@ void chatClient::prepareQueryAcceptInvite(int inviteID, int roomID, QString room
       mapData["roomID"] = roomID;
       mapData["inviteID"] = inviteID;
       mapCommand["codeCommand"] = setCodeCommand::acceptInvite;
+      comm = acceptInvite;
       mapCommand["joDataInput"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;
@@ -269,6 +306,7 @@ void chatClient::prepareQueryAcceptInvite(int inviteID, int roomID, QString room
       // сформировать выходной пакет для отправки на сервер
       out->setPackage(jdQuery);
       // послать запрос
+      qDebug() << "prepareQueryAcceptInvite";
       sendQuery();
 }
 
@@ -289,26 +327,7 @@ void chatClient::prepareQueryRejectInvite(int inviteID)
       // сформировать выходной пакет для отправки на сервер
       out->setPackage(jdQuery);
       // послать запрос
-      sendQuery();
-}
-
-void chatClient::prepareQueryUserInRoom(int roomID)
-{
-    if (socket->state() == QTcpSocket::UnconnectedState){
-        socket->connectToHost("127.0.0.1", 6000);
-    }
-    // формирование JSON- документа
-      QVariantMap mapCommand;
-      QVariantMap mapData;
-      mapData["roomID"] = roomID;
-      mapCommand["codeCommand"] = setCodeCommand::userInRoom;
-      mapCommand["joDataInput"] = mapData;
-      QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
-      //qDebug() << "jdQuery" << jdQuery;
-
-      // сформировать выходной пакет для отправки на сервер
-      out->setPackage(jdQuery);
-      // послать запрос
+      qDebug() << "prepareQueryRejectInvite";
       sendQuery();
 }
 
@@ -324,6 +343,7 @@ void chatClient::prepareQueryDelUser(int userID, int roomID, QString text)
       mapData["userID"] = userID;
       mapData["text"] = text;
       mapCommand["codeCommand"] = setCodeCommand::delUser;
+      comm = delUser;
       mapCommand["joDataInput"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;
@@ -331,6 +351,7 @@ void chatClient::prepareQueryDelUser(int userID, int roomID, QString text)
       // сформировать выходной пакет для отправки на сервер
       out->setPackage(jdQuery);
       // послать запрос
+      qDebug() << "prepareQueryDelUser";
       sendQuery();
 }
 
@@ -347,6 +368,7 @@ QString chatClient::getName()
 
 void chatClient::sendQuery()
 {
+    qDebug() << "sendQuery" << comm;
     // если сокет дождался соединения с сервером
     if (socket->waitForConnected()){
          // запись выходного пакета в сокет
@@ -357,7 +379,10 @@ void chatClient::sendQuery()
             // формируем ответ
             emit sessionClosed("Problem: server time out",
                                setDisconnect::fromServer);
-            //qDebug() << "time out";
+            qDebug() << "time out";
+        }
+        else{
+         qDebug() << " respond time in" << comm;
         }
     }
     else{

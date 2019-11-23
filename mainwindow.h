@@ -55,6 +55,7 @@ private:
     void showAcceptInvite();
     void notifyUpgrade(int inviteID);
     void showDialogDelUser(QVariantMap mapUsers, int roomID);
+    void searchRoomButton(QVariantMap mapData);
 signals:
     void dataAuthCollected(QString login, QString pass);
     void dataNewRoomCollected(QString newRoomName);
