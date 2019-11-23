@@ -44,8 +44,8 @@ void chatClient::readRespond()
         //qDebug() << "44 joTemp" << joTemp;
         QVariantMap mapCommand =joTemp.toVariantMap();
         //qDebug() << "mapCommand" << mapCommand;
-        QVariantMap mapData =  mapCommand["joDataInput"].toMap();
-        //qDebug() << "mapData" << mapData;
+        QVariantMap mapData =  mapCommand["joData"].toMap();
+        qDebug() << "mapData" << mapData;
         switch (setCodeCommand(mapCommand["codeCommand"].toInt())) {
         case setCodeCommand::Auth:
         {
@@ -185,7 +185,7 @@ void chatClient::prepareQueryAuth(QString login, QString pass)
     mapData["login"] = login;
     mapData["pass"] = pass;
     mapCommand["codeCommand"] = setCodeCommand::Auth;
-    mapCommand["joDataInput"] = mapData;
+    mapCommand["joData"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
     comm = Auth;
