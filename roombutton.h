@@ -17,6 +17,7 @@ public:
     QVariantMap getMapUsers();
     void catchRoomClick();
     void setMapMess(QVariantMap mapParam);
+    void setMapUsers(QVariantMap mapParam);
     void debugMapMess(QVariantMap mapMess);
     QList<QVariantMap> getListCastMess();
     void setListCastMess(QList<QVariantMap> listCast);

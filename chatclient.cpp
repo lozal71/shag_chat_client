@@ -45,7 +45,7 @@ void chatClient::readRespond()
         QVariantMap mapCommand =joTemp.toVariantMap();
         //qDebug() << "mapCommand" << mapCommand;
         QVariantMap mapData =  mapCommand["joData"].toMap();
-        qDebug() << "mapData" << mapData;
+        //qDebug() << "mapData" << mapData;
         switch (setCodeCommand(mapCommand["codeCommand"].toInt())) {
         case setCodeCommand::Auth:
         {
@@ -62,16 +62,16 @@ void chatClient::readRespond()
                 //QVariantMap  mapUserName= mapData.first().toMap();
                 this->client.id = mapData["userID"].toInt();
                 this->client.name = mapData["userName"].toString();
-                emit serverRespondedAuth(mapData["rooms"].toMap());
+                emit authSuccess(mapData["rooms"].toMap());
                 if (!mapData["invite"].toMap().isEmpty()){
-                    emit serverNotifyInvite(mapData["invite"].toMap());
+                    emit readInvite(mapData["invite"].toMap());
                 }
             }
             break;
         }
-        case setCodeCommand::Send:
+        case setCodeCommand::newMess:
         {
-            comm = Send;
+            comm = newMess;
             sLog = "sendResult ";
             qDebug() << sLog;
             emit serverCast(mapData);
@@ -94,18 +94,18 @@ void chatClient::readRespond()
             emit serverDeletedRoom(mapData["delRoomID"].toInt());
             break;
         }
-        case setCodeCommand::CastDelRoom:
+        case setCodeCommand::MessDelRoom:
         {
-            comm = CastDelRoom;
+            comm = MessDelRoom;
             sLog = "cast del room";
             qDebug() << sLog;
             //qDebug() << "mapData" << mapData;
             emit serverCastDelRoom(mapData);
             break;
         }
-        case setCodeCommand::CastMess:
+        case setCodeCommand::SendMess:
         {
-            comm = CastMess;
+            comm = SendMess;
             sLog = "cast mess";
             qDebug() << sLog;
             //qDebug() << "91 mapData" << mapData;
@@ -140,7 +140,7 @@ void chatClient::readRespond()
             comm = questInvite;
             sLog = "quest invite";
             qDebug() << sLog;
-            emit serverNotifyInvite(mapData["invite"].toMap());
+            emit readInvite(mapData["invite"].toMap());
             break;
         }
         case setCodeCommand::rejectInvite:
@@ -206,11 +206,11 @@ void chatClient::prepareQuerySendMessage(int roomID, QString text)
     QVariantMap mapData;
     mapData["roomID"] = roomID;
     mapData["text"] = text;
-    mapCommand["codeCommand"] = setCodeCommand::Send;
-    mapCommand["joDataInput"] = mapData;
+    mapCommand["codeCommand"] = setCodeCommand::newMess;
+    mapCommand["joData"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
-    comm = Send;
+    comm = newMess;
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
     // послать запрос
@@ -228,7 +228,7 @@ void chatClient::prepareQueryNewRoom(QString newRoomName)
     QVariantMap mapData;
     mapData["roomNew"] = newRoomName;
     mapCommand["codeCommand"] = setCodeCommand::NewRoom;
-    mapCommand["joDataInput"] = mapData;
+    mapCommand["joData"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
     comm = NewRoom;
@@ -250,7 +250,7 @@ void chatClient::prepareQueryDelRoom(int delRoomID)
     mapData["delRoomID"] = delRoomID;
     mapCommand["codeCommand"] = setCodeCommand::DelRoom;
     comm = DelRoom;
-    mapCommand["joDataInput"] = mapData;
+    mapCommand["joData"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
 
@@ -274,7 +274,7 @@ void chatClient::prepareQueryInvite(QString userName, QString text, int roomID)
       mapData["textInvite"] = text;
       mapCommand["codeCommand"] = setCodeCommand::Invite;
       comm = Invite;
-      mapCommand["joDataInput"] = mapData;
+      mapCommand["joData"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;
 
@@ -299,7 +299,7 @@ void chatClient::prepareQueryAcceptInvite(int inviteID, int roomID, QString room
       mapData["inviteID"] = inviteID;
       mapCommand["codeCommand"] = setCodeCommand::acceptInvite;
       comm = acceptInvite;
-      mapCommand["joDataInput"] = mapData;
+      mapCommand["joData"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;
 
@@ -310,7 +310,8 @@ void chatClient::prepareQueryAcceptInvite(int inviteID, int roomID, QString room
       sendQuery();
 }
 
-void chatClient::prepareQueryRejectInvite(int inviteID)
+void chatClient::prepareQueryRejectInvite(int inviteID, int roomID, QString roomName,
+                                          int senderID, QString senderName)
 {
     if (socket->state() == QTcpSocket::UnconnectedState){
         socket->connectToHost("127.0.0.1", 6000);
@@ -318,9 +319,14 @@ void chatClient::prepareQueryRejectInvite(int inviteID)
     // формирование JSON- документа
       QVariantMap mapCommand;
       QVariantMap mapData;
-      mapData["inviteID"] = inviteID;
+      mapData.insert("invitedName", client.name);
+      mapData.insert("senderID", senderID);
+      mapData.insert("senderName", senderName);
+      mapData.insert("roomName", roomName);
+      mapData.insert("roomID", roomID);
+      mapData.insert("inviteID",inviteID);
       mapCommand["codeCommand"] = setCodeCommand::rejectInvite;
-      mapCommand["joDataInput"] = mapData;
+      mapCommand["joData"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;
 
@@ -344,7 +350,7 @@ void chatClient::prepareQueryDelUser(int userID, int roomID, QString text)
       mapData["text"] = text;
       mapCommand["codeCommand"] = setCodeCommand::delUser;
       comm = delUser;
-      mapCommand["joDataInput"] = mapData;
+      mapCommand["joData"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;
 

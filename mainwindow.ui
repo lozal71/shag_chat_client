@@ -577,6 +577,7 @@
     <addaction name="actionNewRoom"/>
     <addaction name="actionDeleteRoom"/>
     <addaction name="separator"/>
+    <addaction name="actionView_members"/>
     <addaction name="actionInvite"/>
     <addaction name="actionDelete_user"/>
     <addaction name="separator"/>
@@ -621,6 +622,11 @@
   <action name="actionDelete_user">
    <property name="text">
     <string>Delete user</string>
+   </property>
+  </action>
+  <action name="actionView_members">
+   <property name="text">
+    <string>View members</string>
    </property>
   </action>
  </widget>
