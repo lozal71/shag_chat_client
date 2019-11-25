@@ -438,7 +438,7 @@ void MainWindow::showNotifyInvite(QVariantMap mapInvitations)
 
 void MainWindow::showAcceptInvite()
 {
-    //qDebug() << "showAcceptInvite";
+    qDebug() << "showAcceptInvite";
     int r;
     QString sParam;
     QString senderName = inviteActiv->getMap()["senderName"].toString();
@@ -450,19 +450,21 @@ void MainWindow::showAcceptInvite()
     QMessageBox quest(QMessageBox::Question,"Question",sParam);
     quest.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
     r=quest.exec();
+    qDebug() << "r= " << r;
     if(r == QMessageBox::Yes) {
+        qDebug() << "459 accept invite";
+        ui->cbxNotify->removeItem(inviteActiv->getIndex());
         client->prepareQueryAcceptInvite(inviteActiv->getInviteID(),
                                          inviteActiv->getMap()["roomID"].toInt(),
                                          inviteActiv->getMap()["roomName"].toString());
-        ui->cbxNotify->removeItem(inviteActiv->getIndex());
 
-        //qDebug() << "accept invite";
     }
     else {
+        qDebug() << "465 reject invite";
+        ui->cbxNotify->removeItem(inviteActiv->getIndex());
         client->prepareQueryRejectInvite(inviteActiv->getInviteID(),
                                          roomID, roomName,senderID,senderName);
-        ui->cbxNotify->removeItem(inviteActiv->getIndex());
-        //qDebug() << "reject invite";
+
     }
 }
 
@@ -528,7 +530,8 @@ void MainWindow::searchRoomButton(QVariantMap mapData)
                                        mapData["senderName"].toString());
             }
             else {
-                currentRoom->getMapUsers().remove(mapData["userID"].toString());
+                currentMapUsers = currentRoom->getMapUsers();
+                currentMapUsers.remove(mapData["userID"].toString());
             }
             showCast(mapData);
             break;

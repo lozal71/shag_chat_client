@@ -47,9 +47,9 @@ void chatClient::readRespond()
         QVariantMap mapData =  mapCommand["joData"].toMap();
         //qDebug() << "mapData" << mapData;
         switch (setCodeCommand(mapCommand["codeCommand"].toInt())) {
-        case setCodeCommand::Auth:
+        case setCodeCommand::auth:
         {
-            comm = Auth;
+            //comm = Auth;
             sLog = "Auth";
             qDebug() << sLog;
             this->client.id = mapData["userID"].toInt();
@@ -71,50 +71,50 @@ void chatClient::readRespond()
         }
         case setCodeCommand::newMess:
         {
-            comm = newMess;
+            //comm = newMess;
             sLog = "sendResult ";
             qDebug() << sLog;
             emit serverCast(mapData);
             break;
         }
-        case setCodeCommand::NewRoom:
+        case setCodeCommand::newRoom:
         {
-            comm = NewRoom;
+            //comm = NewRoom;
             sLog = "newRoomID " + mapData["newRoomID"].toString();
             sLog += "newRoomName" + mapData["newRoomName"].toString();
             qDebug() << sLog;
             emit serverRaspondedNewRoom(mapData);
             break;
         }
-        case setCodeCommand::DelRoom:
+        case setCodeCommand::delRoom:
         {
-            comm = DelRoom;
+            //comm = DelRoom;
             sLog = "delRoomID " + mapData["delRoomID"].toString();
             qDebug() << sLog;
             emit serverDeletedRoom(mapData["delRoomID"].toInt());
             break;
         }
-        case setCodeCommand::MessDelRoom:
+        case setCodeCommand::messDelRoom:
         {
-            comm = MessDelRoom;
+            //comm = MessDelRoom;
             sLog = "cast del room";
             qDebug() << sLog;
             //qDebug() << "mapData" << mapData;
             emit serverCastDelRoom(mapData);
             break;
         }
-        case setCodeCommand::SendMess:
+        case setCodeCommand::sendMess:
         {
-            comm = SendMess;
+            //comm = SendMess;
             sLog = "cast mess";
             qDebug() << sLog;
             //qDebug() << "91 mapData" << mapData;
             emit serverCast(mapData);
             break;
         }
-        case setCodeCommand::Invite:
+        case setCodeCommand::invite:
         {
-            comm = Invite;
+            //comm = Invite;
             if (mapData["invitedUserID"].toInt() == 0)
                 sLog = "not exist user " + mapData["invitedUserName"].toString();
             else if (mapData["invitedUserID"].toInt() == -1)
@@ -128,7 +128,7 @@ void chatClient::readRespond()
         }
         case setCodeCommand::acceptInvite:
         {
-            comm = acceptInvite;
+            //comm = acceptInvite;
             sLog = "accept invite";
             qDebug() << sLog;
             emit RoomsUserUpgrate(mapData);
@@ -137,7 +137,7 @@ void chatClient::readRespond()
         }
         case setCodeCommand::questInvite:
         {
-            comm = questInvite;
+            //comm = questInvite;
             sLog = "quest invite";
             qDebug() << sLog;
             emit readInvite(mapData["invite"].toMap());
@@ -145,7 +145,7 @@ void chatClient::readRespond()
         }
         case setCodeCommand::rejectInvite:
         {
-            comm = rejectInvite;
+            //comm = rejectInvite;
             sLog = "reject invite";
             qDebug() << sLog;
             emit notifyUpgrated(mapData["inviteID"].toInt());
@@ -153,23 +153,24 @@ void chatClient::readRespond()
         }
         case setCodeCommand::delUser:
         {
-            comm = delUser;
+            //comm = delUser;
             sLog = "delete user";
             qDebug() << sLog;
             emit serverCast(mapData);
-            mapData["updateParam"] = removeUser;
+            //mapData["updateParam"] = removeUser;
             emit usersUpdated(mapData);
             break;
         }
         case setCodeCommand::updateUsers:
         {
-            comm = updateUsers;
+            //comm = updateUsers;
             sLog = "updateUsers";
             qDebug() << sLog;
             emit usersUpdated(mapData);
             break;
         }
         }
+
     }
 
 }
@@ -184,11 +185,11 @@ void chatClient::prepareQueryAuth(QString login, QString pass)
     QVariantMap mapData;
     mapData["login"] = login;
     mapData["pass"] = pass;
-    mapCommand["codeCommand"] = setCodeCommand::Auth;
+    mapCommand["codeCommand"] = setCodeCommand::auth;
     mapCommand["joData"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
-    comm = Auth;
+    //comm = Auth;
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
     // послать запрос
@@ -210,7 +211,7 @@ void chatClient::prepareQuerySendMessage(int roomID, QString text)
     mapCommand["joData"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
-    comm = newMess;
+    //comm = newMess;
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
     // послать запрос
@@ -227,11 +228,11 @@ void chatClient::prepareQueryNewRoom(QString newRoomName)
     QVariantMap mapCommand;
     QVariantMap mapData;
     mapData["roomNew"] = newRoomName;
-    mapCommand["codeCommand"] = setCodeCommand::NewRoom;
+    mapCommand["codeCommand"] = setCodeCommand::newRoom;
     mapCommand["joData"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
-    comm = NewRoom;
+    //comm = NewRoom;
     // сформировать выходной пакет для отправки на сервер
     out->setPackage(jdQuery);
     // послать запрос
@@ -248,8 +249,8 @@ void chatClient::prepareQueryDelRoom(int delRoomID)
     QVariantMap mapCommand;
     QVariantMap mapData;
     mapData["delRoomID"] = delRoomID;
-    mapCommand["codeCommand"] = setCodeCommand::DelRoom;
-    comm = DelRoom;
+    mapCommand["codeCommand"] = setCodeCommand::delRoom;
+    //comm = DelRoom;
     mapCommand["joData"] = mapData;
     QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
     //qDebug() << "jdQuery" << jdQuery;
@@ -272,8 +273,8 @@ void chatClient::prepareQueryInvite(QString userName, QString text, int roomID)
       mapData["roomID"] = roomID;
       mapData["userName"] = userName;
       mapData["textInvite"] = text;
-      mapCommand["codeCommand"] = setCodeCommand::Invite;
-      comm = Invite;
+      mapCommand["codeCommand"] = setCodeCommand::invite;
+      //comm = Invite;
       mapCommand["joData"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;
@@ -298,7 +299,7 @@ void chatClient::prepareQueryAcceptInvite(int inviteID, int roomID, QString room
       mapData["roomID"] = roomID;
       mapData["inviteID"] = inviteID;
       mapCommand["codeCommand"] = setCodeCommand::acceptInvite;
-      comm = acceptInvite;
+      //comm = acceptInvite;
       mapCommand["joData"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;
@@ -349,7 +350,7 @@ void chatClient::prepareQueryDelUser(int userID, int roomID, QString text)
       mapData["userID"] = userID;
       mapData["text"] = text;
       mapCommand["codeCommand"] = setCodeCommand::delUser;
-      comm = delUser;
+      //comm = delUser;
       mapCommand["joData"] = mapData;
       QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;
@@ -374,7 +375,7 @@ QString chatClient::getName()
 
 void chatClient::sendQuery()
 {
-    qDebug() << "sendQuery" << comm;
+    //qDebug() << "sendQuery"; //<< comm;
     // если сокет дождался соединения с сервером
     if (socket->waitForConnected()){
          // запись выходного пакета в сокет
@@ -388,7 +389,7 @@ void chatClient::sendQuery()
             qDebug() << "time out";
         }
         else{
-         qDebug() << " respond time in" << comm;
+         qDebug() << " respond time in" ;//<< comm;
         }
     }
     else{

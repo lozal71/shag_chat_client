@@ -8,16 +8,16 @@
 
 enum setUpdateUsers {addUser, removeUser};
 enum setDisconnect {fromServer, fromClient, undefined};
-enum setCodeCommand {Auth = 1, newMess = 2, NewRoom = 3, DelRoom = 4,
-                     MessDelRoom = 5, SendMess = 6, Invite = 7, questInvite = 8,
-                     acceptInvite = 9, rejectInvite = 10, delUser = 11, updateUsers = 12 };
+enum setCodeCommand {auth = 1, newMess = 2, newRoom = 3, delRoom = 4,
+                     messDelRoom = 5, sendMess = 6, invite = 7, questInvite = 8,
+                     acceptInvite = 9, rejectInvite = 10, delUser = 11, updateUsers = 12};
 
 struct clientData {
     int id;
     QString name;
 };
 
-static setCodeCommand comm;
+//static setCodeCommand comm;
 
 class chatClient : public QObject
 {
