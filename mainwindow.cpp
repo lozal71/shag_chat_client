@@ -176,14 +176,19 @@ void MainWindow::showWarningDisconnect(QString sParam, setDisconnect discParam)
 // сбор данных для отправки сообщения
 void MainWindow::collectDataSend()
 {
-    // если LineEdit не пусто
-    if (!ui->leWriteMes->text().isEmpty()){
+    if (roomActiv->getRole() == "user" && roomActiv->getMapUsers().isEmpty()){
+        showWarning("Вы удалены из этой комнаты");
+    }
+    else {
+        // если LineEdit не пусто
+        if (!ui->leWriteMes->text().isEmpty()){
 
-        // подготовка запроса - "отправка сообщения"
-        client->prepareQuerySendMessage(roomActiv->getRoomID(),
-                                        ui->leWriteMes->text());
-        // очищаем LineEdit
-        ui->leWriteMes->clear();
+            // подготовка запроса - "отправка сообщения"
+            client->prepareQuerySendMessage(roomActiv->getRoomID(),
+                                            ui->leWriteMes->text());
+            // очищаем LineEdit
+            ui->leWriteMes->clear();
+        }
     }
 }
 
@@ -450,9 +455,9 @@ void MainWindow::showAcceptInvite()
     QMessageBox quest(QMessageBox::Question,"Question",sParam);
     quest.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
     r=quest.exec();
-    qDebug() << "r= " << r;
+    //qDebug() << "r= " << r;
     if(r == QMessageBox::Yes) {
-        qDebug() << "459 accept invite";
+        //qDebug() << "459 accept invite";
         ui->cbxNotify->removeItem(inviteActiv->getIndex());
         client->prepareQueryAcceptInvite(inviteActiv->getInviteID(),
                                          inviteActiv->getMap()["roomID"].toInt(),
@@ -460,7 +465,7 @@ void MainWindow::showAcceptInvite()
 
     }
     else {
-        qDebug() << "465 reject invite";
+        //qDebug() << "465 reject invite";
         ui->cbxNotify->removeItem(inviteActiv->getIndex());
         client->prepareQueryRejectInvite(inviteActiv->getInviteID(),
                                          roomID, roomName,senderID,senderName);
@@ -516,22 +521,27 @@ void MainWindow::showDialogMembers(QVariantMap mapUsers, int roomID)
 
 void MainWindow::searchRoomButton(QVariantMap mapData)
 {
-    qDebug() << "512 senderName" << mapData["senderName"].toString();
-    qDebug() << "roomID" << mapData["roomID"].toInt();
+    //qDebug() << "512 senderName" << mapData["senderName"].toString();
+    //qDebug() << "roomID" << mapData["roomID"].toInt();
     QVariantMap currentMapUsers;
     QListIterator<RoomButton*> iRoom(listRoomButton);
     RoomButton* currentRoom = roomActiv;
+    setUpdateUsers updateParam = setUpdateUsers(mapData["updateParam"].toInt());
     while (iRoom.hasNext()) {
         currentRoom = iRoom.next();
+        currentMapUsers = currentRoom->getMapUsers();
         if (currentRoom->getRoomID() == mapData["roomID"].toInt()){
-            if (mapData["updateParam"].toInt() == int(setUpdateUsers::addUser)){
-                currentMapUsers = currentRoom->getMapUsers();
+            if ( updateParam == setUpdateUsers::addUser){
                 currentMapUsers.insert(mapData["userID"].toString(),
                                        mapData["senderName"].toString());
             }
             else {
-                currentMapUsers = currentRoom->getMapUsers();
-                currentMapUsers.remove(mapData["userID"].toString());
+                if (updateParam == setUpdateUsers::delIsYou){
+                    currentMapUsers.clear();
+                }
+                else {
+                    currentMapUsers.remove(mapData["userID"].toString());
+                }
             }
             showCast(mapData);
             break;
