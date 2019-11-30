@@ -5,10 +5,10 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-class protocolOut: public QObject
+class protocol_out: public QObject
 {
 public:
-    protocolOut();
+    protocol_out();
     QByteArray getPackage();
     void setPackage(QJsonDocument jdParam);
 private:

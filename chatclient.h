@@ -1,9 +1,10 @@
 #ifndef CHATCLIENT_H
 #define CHATCLIENT_H
 
-#include <QTcpSocket>
-#include "protocol_in.h"
-#include "protocol_out.h"
+//#include <QTcpSocket>
+#include "net.h"
+//#include "protocol_in.h"
+//#include "protocol_out.h"
 #include <QDateTime>
 
 enum setUpdateUsers {addUser, removeUser, delIsYou};
@@ -40,11 +41,11 @@ public:
     QString getName();
 private:
     QTcpSocket * socket;
-    protocolOut *out;
-    protocolIn *in;
+    net *out;
+    //protocolIn *in;
     clientData client;
     void readRespond();
-    void sendQuery();
+    void sendQuery(QVariantMap mapSocket);
 signals:
     void sessionClosed(QString sParam, setDisconnect discParam);
     void authSuccess(QVariantMap mapRooms);

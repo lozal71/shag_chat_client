@@ -198,11 +198,12 @@ void MainWindow::showRoomsUserName(QVariantMap mapRoomsID)
     // авторизация прошла успешно - делаем недоступным меню авторизации
     dialogAuth->authAgain=false;
     ui->actionAuth->setEnabled(false);
-    // в mainToolBar пишем имя пользователя
+    // в WindowTitle пишем имя пользователя
     qDebug() << client->getName();
-    lblUserName->setText(client->getName() + " ");
-    ui->mainToolBar->addWidget(lblUserName);
-    ui->mainToolBar->update();
+    this->setWindowTitle(client->getName());
+    //lblUserName->setText(client->getName() + " ");
+    //ui->mainToolBar->addWidget(lblUserName);
+    //ui->mainToolBar->update();
     // разворачиваем кнопки-комнаты по ключу roomID
     for (const QString& sRoomID: mapRoomsID.keys()){
         QVariantMap mapRooms = mapRoomsID[sRoomID].toMap();
@@ -538,6 +539,7 @@ void MainWindow::searchRoomButton(QVariantMap mapData)
             else {
                 if (updateParam == setUpdateUsers::delIsYou){
                     currentMapUsers.clear();
+                    currentRoom->setStyleSheet("font: 14px; color: black; background-color: yellow");
                 }
                 else {
                     currentMapUsers.remove(mapData["userID"].toString());

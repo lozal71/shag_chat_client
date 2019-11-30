@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QTcpSocket>
+//#include <QTcpSocket>
 #include "chatclient.h"
 #include "roombutton.h"
 #include <QMainWindow>

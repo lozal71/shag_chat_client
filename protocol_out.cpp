@@ -1,17 +1,17 @@
 #include "protocol_out.h"
 
 
-protocolOut::protocolOut()
+protocol_out::protocol_out()
 {
 
 }
 
-QByteArray protocolOut::getPackage()
+QByteArray protocol_out::getPackage()
 {
     return baPackage;
 }
 
-void protocolOut::setPackage(QJsonDocument jdParam)
+void protocol_out::setPackage(QJsonDocument jdParam)
 {
     baPackage.clear();
     //qDebug() << "jdParam" << jdParam;

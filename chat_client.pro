@@ -20,10 +20,12 @@ CONFIG += c++17
 
 SOURCES += \
         chatclient.cpp \
+        clientui.cpp \
         dialogauth.cpp \
         dialoginvite.cpp \
         main.cpp \
         mainwindow.cpp \
+        net.cpp \
         notifybutton.cpp \
         protocol_in.cpp \
         protocol_out.cpp \
@@ -31,15 +33,18 @@ SOURCES += \
 
 HEADERS += \
         chatclient.h \
+        clientui.h \
         dialogauth.h \
         dialoginvite.h \
         mainwindow.h \
+        net.h \
         notifybutton.h \
         protocol_in.h \
         protocol_out.h \
         roombutton.h
 
 FORMS += \
+        clientui.ui \
         dialogauth.ui \
         dialoginvite.ui \
         mainwindow.ui
