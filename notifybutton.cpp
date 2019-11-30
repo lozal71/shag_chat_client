@@ -4,7 +4,7 @@ NotifyButton::NotifyButton()
 {
     setEnabled(false);
     setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-    setText("view notify");
+    setText("посмотреть");
     btnInvite.cbxIndex = -1;
     btnInvite.mapInvite.clear();
     btnInvite.inviteID = -1;
@@ -20,7 +20,7 @@ NotifyButton::NotifyButton(int cbxIndex, QVariantMap mapInvite, int inviteID)
 
 void NotifyButton::setNull()
 {
-    setText("view notify");
+    setText("посмотреть");
     btnInvite.cbxIndex = -1;
     btnInvite.mapInvite.clear();
     btnInvite.inviteID = -1;

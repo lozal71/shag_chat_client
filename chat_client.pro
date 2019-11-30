@@ -27,8 +27,6 @@ SOURCES += \
         mainwindow.cpp \
         net.cpp \
         notifybutton.cpp \
-        protocol_in.cpp \
-        protocol_out.cpp \
         roombutton.cpp
 
 HEADERS += \
@@ -39,8 +37,6 @@ HEADERS += \
         mainwindow.h \
         net.h \
         notifybutton.h \
-        protocol_in.h \
-        protocol_out.h \
         roombutton.h
 
 FORMS += \

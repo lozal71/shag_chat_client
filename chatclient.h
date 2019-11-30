@@ -41,8 +41,7 @@ public:
     QString getName();
 private:
     QTcpSocket * socket;
-    net *out;
-    //protocolIn *in;
+    net *protocol;
     clientData client;
     void readRespond();
     void sendQuery(QVariantMap mapSocket);

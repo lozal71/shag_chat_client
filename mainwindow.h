@@ -24,10 +24,11 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     chatClient* getClient();
+    RoomButton* getRoomButton(int roomID);
     DialogAuth *dialogAuth;
     DialogInvite *invite;
     QLabel *lblWarning;
-    QLabel *lblUserName;
+   // QLabel *lblUserName;
 public slots:
     void resetNotifyButton(int indexInvite);
 private:
@@ -55,7 +56,7 @@ private:
     void showAcceptInvite();
     void notifyUpgrade(int inviteID);
     void showDialogMembers(QVariantMap mapUsers, int roomID);
-    void searchRoomButton(QVariantMap mapData);
+    void changeUsersRoom(QVariantMap mapData);
 signals:
     void dataAuthCollected(QString login, QString pass);
     void dataNewRoomCollected(QString newRoomName);

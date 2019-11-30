@@ -12,7 +12,7 @@ net::net(QTcpSocket *socket)
 
 void net::writeSocket(QVariantMap mapSocket)
 {
-    qDebug() << "writeSocket";
+    //qDebug() << "writeSocket";
     jsonDoc = QJsonDocument::fromVariant(mapSocket);
     transferJSONtoBA();
     this->socket->write(baPackage);
@@ -83,13 +83,13 @@ bool net::isError()
 void net::transferJSONtoBA()
 {
     baPackage.clear();
-    qDebug() << "jsonDoc" << jsonDoc;
+    //qDebug() << "jsonDoc" << jsonDoc;
     QByteArray baTemp = jsonDoc.toJson(QJsonDocument::Compact);
     quint32 packageSize = quint32(baTemp.size());
-    qDebug() << "packageSize" << packageSize;
+    //qDebug() << "packageSize" << packageSize;
     QDataStream stream(&baPackage, QIODevice::ReadWrite);
     stream << packageSize;
-    qDebug() << "setPackage baPackage" <<baPackage ;
+    //qDebug() << "setPackage baPackage" <<baPackage ;
     stream << baTemp;
     qDebug() << "setPackage baPackage" <<baPackage ;
 }

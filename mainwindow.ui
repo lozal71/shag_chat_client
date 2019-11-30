@@ -517,22 +517,22 @@
    <widget class="QLabel" name="lblNotify">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>20</x>
       <y>10</y>
-      <width>61</width>
+      <width>121</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Notify</string>
+     <string>Уведомления</string>
     </property>
    </widget>
    <widget class="QComboBox" name="cbxNotify">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>170</x>
       <y>10</y>
-      <width>191</width>
+      <width>231</width>
       <height>31</height>
      </rect>
     </property>
@@ -596,37 +596,37 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionQuit">
    <property name="text">
-    <string>Quit</string>
+    <string>Выход</string>
    </property>
   </action>
   <action name="actionNewRoom">
    <property name="text">
-    <string>NewRoom</string>
+    <string>Создать новую комнату</string>
    </property>
   </action>
   <action name="actionAuth">
    <property name="text">
-    <string>Auth</string>
+    <string>Авторизация</string>
    </property>
   </action>
   <action name="actionDeleteRoom">
    <property name="text">
-    <string>DeleteRoom</string>
+    <string>Удалить комнату</string>
    </property>
   </action>
   <action name="actionInvite">
    <property name="text">
-    <string>Invite user</string>
+    <string>Пригласить нового участника</string>
    </property>
   </action>
   <action name="actionDelete_user">
    <property name="text">
-    <string>Delete user</string>
+    <string>Удалить участника</string>
    </property>
   </action>
   <action name="actionView_members">
    <property name="text">
-    <string>View members</string>
+    <string>Посмотреть участников</string>
    </property>
   </action>
  </widget>

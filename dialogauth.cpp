@@ -49,7 +49,7 @@ void DialogAuth::showWarningAuth(QString sParam)
     int r;
     // сообщаем пользователю о проблеме авторизации
     // и спрашиваем хочет ли он попробовать еще раз
-    QMessageBox quest(QMessageBox::Question,"Question",sParam);
+    QMessageBox quest(QMessageBox::Question,"Вопрос",sParam);
     quest.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
     r=quest.exec();
     if(r == QMessageBox::Yes) {

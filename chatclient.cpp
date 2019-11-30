@@ -5,7 +5,7 @@
 chatClient::chatClient()
 {
     socket = new QTcpSocket();
-    out = new net(socket);
+    protocol = new net(socket);
     //in = new protocolIn();
     client.id = 0;
     client.name.clear();
@@ -15,7 +15,7 @@ chatClient::chatClient()
 chatClient::~chatClient()
 {
     delete socket;
-    delete out;
+    delete protocol;
     //delete in;
 }
 
@@ -34,10 +34,10 @@ void chatClient::readRespond()
     // получаем JSON-документ из сокета
     //QJsonDocument jdTemp = in->receiveJSONdoc(socket);
     //qDebug() << "35 jdTemp" << jdTemp;
-    QVariantMap mapCommand = out->readSocket();
+    QVariantMap mapCommand = protocol->readSocket();
     QVariantMap mapData =  mapCommand["joData"].toMap();
     QString sLog;
-    if (out->isError()){
+    if (protocol->isError()){
         sLog = "Problem: error massage";
         qDebug() << sLog;
     }
@@ -279,8 +279,8 @@ void chatClient::prepareQueryInvite(QString userName, QString text, int roomID)
       mapData["textInvite"] = text;
       mapCommand["codeCommand"] = setCodeCommand::invite;
       //comm = Invite;
-     /* mapCommand["joData"] = mapData;
-      QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);*/
+      mapCommand["joData"] = mapData;
+      //QJsonDocument jdQuery = QJsonDocument::fromVariant(mapCommand);
       //qDebug() << "jdQuery" << jdQuery;
 
       // сформировать выходной пакет для отправки на сервер
@@ -379,13 +379,13 @@ QString chatClient::getName()
 
 void chatClient::sendQuery(QVariantMap mapSocket)
 {
-    qDebug() << "sendQuery"; //<< comm;
+    //qDebug() << "sendQuery"; //<< comm;
     // если сокет дождался соединения с сервером
     if (socket->waitForConnected()){
          // запись выходного пакета в сокет
         //socket->write(out->writeSocket());
-            qDebug() << "sendQuery";
-        out->writeSocket(mapSocket);
+            //qDebug() << "sendQuery";
+        protocol->writeSocket(mapSocket);
         // ожидание ответа
         // если ответ не получен в течение 5 секунд
         if (!socket->waitForReadyRead(5000)) {
