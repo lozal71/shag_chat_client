@@ -4,11 +4,15 @@
 #include <QVariantMap>
 #include <QPushButton>
 #include <QList>
+#include <QScrollArea>
+
+enum setUpdateUsers {addUser, removeUser, delIsYou};
 
 class RoomButton: public QPushButton
 {
     Q_OBJECT
 public:
+    //explicit RoomButton(QWidget *parent = nullptr);
     RoomButton(int ID, QString role, QString sName, QVariantMap mapMess, QVariantMap mapUsers);
     int getRoomID();
     QString getRole();
@@ -21,7 +25,10 @@ public:
     void debugMapMess(QVariantMap mapMess);
     QList<QVariantMap> getListCastMess();
     void setListCastMess(QList<QVariantMap> listCast);
+    void updateCastMess(QVariantMap mapMess);
+    void updateMapUsers(QString userID, QString senderName, setUpdateUsers param);
 private:
+
     struct roomData {
         int id;
         QString role;

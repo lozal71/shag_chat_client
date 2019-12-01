@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-//#include <QTcpSocket>
 #include "chatclient.h"
 #include "roombutton.h"
 #include <QMainWindow>
@@ -10,6 +9,8 @@
 #include <QInputDialog>
 #include "dialoginvite.h"
 #include "notifybutton.h"
+#include <QtWidgets>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {class MainWindow;}
@@ -24,7 +25,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     chatClient* getClient();
-    RoomButton* getRoomButton(int roomID);
+
     DialogAuth *dialogAuth;
     DialogInvite *invite;
     QLabel *lblWarning;
@@ -33,11 +34,22 @@ public slots:
     void resetNotifyButton(int indexInvite);
 private:
     Ui::MainWindow *ui;
-    chatClient * client;
+    QPalette pall;
+
+    chatClient* client;
     RoomButton* roomActiv;
     NotifyButton *inviteActiv;
     QList<RoomButton*> listRoomButton;
     QList<NotifyButton*> listNotifyButton;
+    RoomButton* getRoomButton(int roomID);
+    void delRoomFromList(int roomID);
+    void dellRoomList();
+    void paintOneRoom (int roomID, QString color);
+    void paintAllRoomExceptOne (int roomID, QString color);
+    void addNewRoomToList(int roomID, QString role, QString roomName,
+                          QVariantMap mapMess, QVariantMap mapUsers);
+    void delInvite(int inviteID);
+    void delAllInvite();
     bool flagActionQuit;
     void connectClientUI();
     void showWarningDisconnect(QString sParam, setDisconnect discParam);

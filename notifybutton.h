@@ -6,6 +6,7 @@
 #include <QVariantMap>
 #include <QPushButton>
 
+
 class NotifyButton: public QPushButton
 {
     Q_OBJECT
@@ -17,6 +18,7 @@ public:
     int getIndex();
     QVariantMap getMap();
     int getInviteID();
+
 private:
     struct inviteData {
         int cbxIndex;

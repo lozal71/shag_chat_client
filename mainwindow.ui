@@ -463,18 +463,10 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="verticalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>60</y>
-      <width>141</width>
-      <height>381</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="vltListRooms"/>
-   </widget>
    <widget class="QTextEdit" name="teChat">
     <property name="enabled">
      <bool>true</bool>
@@ -547,6 +539,17 @@
      </rect>
     </property>
     <layout class="QVBoxLayout" name="vltNotify"/>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>60</y>
+      <width>121</width>
+      <height>371</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="vltListRooms"/>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">

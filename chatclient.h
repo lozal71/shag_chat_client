@@ -7,7 +7,7 @@
 //#include "protocol_out.h"
 #include <QDateTime>
 
-enum setUpdateUsers {addUser, removeUser, delIsYou};
+
 enum setDisconnect {fromServer, fromClient, undefined};
 enum setCodeCommand {auth = 1, newMess = 2, newRoom = 3, delRoom = 4,
                      messDelRoom = 5, sendMess = 6, invite = 7, questInvite = 8,

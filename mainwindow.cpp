@@ -10,9 +10,13 @@ MainWindow::MainWindow(QWidget *parent)
     dialogAuth = new DialogAuth();
     invite = new DialogInvite();
     lblWarning = new QLabel();
-    //lblUserName = new QLabel();
     inviteActiv = new NotifyButton();
     connectClientUI();
+
+    pall.setColor(this->backgroundRole(),Qt::gray);
+    this->setPalette(pall);
+
+
     ui->leWriteMes->setPlaceholderText("Пишите здесь...");
     ui->teChat->setReadOnly(true);
     ui->actionAuth->setEnabled(false);
@@ -23,27 +27,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    if (!listRoomButton.isEmpty()){
-        QMutableListIterator<RoomButton*> iRoom(listRoomButton);
-        RoomButton* currRoom;
-        while (iRoom.hasNext()){
-            currRoom = iRoom.next();
-            iRoom.remove();
-            delete currRoom;
-        }
-    }
-    if (!listNotifyButton.isEmpty()){
-        QMutableListIterator<NotifyButton*> iNotify(listNotifyButton);
-        NotifyButton* currNotify;
-        while(iNotify.hasNext()){
-            currNotify = iNotify.next();
-            iNotify.remove();
-            delete currNotify;
-        }
-    }
+    dellRoomList();
+    delAllInvite();
     if (!inviteActiv) delete inviteActiv;
     if (!lblWarning) delete lblWarning;
-
     if (!invite) delete invite;
     delete dialogAuth;
     delete client;
@@ -68,9 +55,94 @@ RoomButton *MainWindow::getRoomButton(int roomID)
     return currentRoom;
 }
 
+void MainWindow::delRoomFromList(int roomID)
+{
+    QMutableListIterator<RoomButton*> iiRoom(listRoomButton);
+    RoomButton* currRoom = roomActiv;
+    while (iiRoom.hasNext()){
+         currRoom = iiRoom.next();
+         //qDebug() << currRoom->getRoomName();
+        if (currRoom->getRoomID() == roomID ){
+            //qDebug() << "remove room ";
+            ui->vltListRooms->removeWidget(currRoom);
+            ui->vltListRooms->update();
+            //qDebug() << "listRoomButton" << listRoomButton;
+            iiRoom.remove();
+            delete currRoom;
+            //qDebug() << "listRoomButton" << listRoomButton;
+            break;
+        }
+    }
+}
+
+void MainWindow::dellRoomList()
+{
+    if (!listRoomButton.isEmpty()){
+        QMutableListIterator<RoomButton*> iRoom(listRoomButton);
+        RoomButton* currRoom;
+        while (iRoom.hasNext()){
+            currRoom = iRoom.next();
+            iRoom.remove();
+            delete currRoom;
+        }
+    }
+}
+
+void MainWindow::paintOneRoom(int roomID, QString color)
+{
+    RoomButton* currRoom = getRoomButton(roomID);
+    currRoom->setStyleSheet("font: 14px; color: white; background-color: " + color );
+}
+
+void MainWindow::paintAllRoomExceptOne(int roomID, QString color)
+{
+    RoomButton* currRoom = getRoomButton(roomID);
+    currRoom->setStyleSheet("font: 14px; color: black; background-color: " + color);
+}
+
+void MainWindow::addNewRoomToList(int roomID, QString role, QString roomName,
+                                  QVariantMap mapMess, QVariantMap mapUsers)
+{
+    // создаем кнопку-комнату
+    RoomButton *btnRoom = new RoomButton(roomID, role, roomName,
+                                         mapMess, mapUsers);
+    // клик по комнате - показываем сообщения комнаты
+    connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
+    listRoomButton.append(btnRoom);
+    ui->vltListRooms->addWidget(btnRoom);
+    ui->vltListRooms->update();
+}
+
+void MainWindow::delInvite(int inviteID)
+{
+    QMutableListIterator<NotifyButton*> iNotify(listNotifyButton);
+    NotifyButton* currNotify;
+    while(iNotify.hasNext()){
+        currNotify = iNotify.next();
+        if (currNotify->getInviteID() == inviteID){
+            iNotify.remove();
+            ui->cbxNotify->removeItem(currNotify->getIndex());
+            delete currNotify;
+            break;
+        }
+    }
+}
+
+void MainWindow::delAllInvite()
+{
+    if (!listNotifyButton.isEmpty()){
+        QMutableListIterator<NotifyButton*> iNotify(listNotifyButton);
+        NotifyButton* currNotify;
+        while(iNotify.hasNext()){
+            currNotify = iNotify.next();
+            iNotify.remove();
+            delete currNotify;
+        }
+    }
+}
+
 void MainWindow::resetNotifyButton(int indexInvite)
 {
-    //qDebug() << "indexInvite" << indexInvite;
     inviteActiv->setEnabled(true);
     QListIterator<NotifyButton*> iNotify(listNotifyButton);
     NotifyButton *currNotify = inviteActiv;
@@ -80,8 +152,6 @@ void MainWindow::resetNotifyButton(int indexInvite)
             inviteActiv->setParam(currNotify->getIndex(),
                                   currNotify->getMap(),
                                   currNotify->getInviteID());
-            //qDebug() << "inviteActiv" << inviteActiv;
-            //qDebug() << "inviteActiv->getMap()" << inviteActiv->getMap();
             break;
         }
     }
@@ -157,7 +227,6 @@ void MainWindow::showWarning(QString sParam)
     QMessageBox msbx(QMessageBox::Warning,"Warning",sParam);
     msbx.exec();
 }
-
 
 void MainWindow::showWarningDisconnect(QString sParam, setDisconnect discParam)
 {
@@ -294,36 +363,11 @@ void MainWindow::showMessage()
 
 void MainWindow::showCastDelRoom(QVariantMap mapData)
 {
-    //qDebug() << "showCastDelRoom";
-    //RoomButton* currRoom = getRoomButton(mapData["roomID"].toInt());
-        QMutableListIterator<RoomButton*> iiRoom(listRoomButton);
-        RoomButton* currRoom = roomActiv;
-        while (iiRoom.hasNext()){
-             currRoom = iiRoom.next();
-             //qDebug() << currRoom->getRoomName();
-            if (currRoom->getRoomID() == mapData["roomID"].toInt() ){
-                //qDebug() << "remove room ";
-            ui->vltListRooms->removeWidget(currRoom);
-            ui->vltListRooms->update();
-            //qDebug() << "listRoomButton" << listRoomButton;
-            iiRoom.remove();
-            delete currRoom;
-            //qDebug() << "listRoomButton" << listRoomButton;
-            break;
-        }
-    }    
-    QList<QVariantMap> castList;
-    QListIterator<RoomButton*> iRoom(listRoomButton);
-    while (iRoom.hasNext()){
-        currRoom = iRoom.next();
-        if (currRoom->getRoomID() == 1) {
-            castList = currRoom->getListCastMess();
-            castList.append(mapData);
-            currRoom->setStyleSheet("font: 14px; color: white; background-color: green");
-            break;
-        }
-    }
-    currRoom->setListCastMess(castList);
+    int roomID = mapData["roomID"].toInt();
+    delRoomFromList(roomID);
+    paintOneRoom(1 , "green");
+    RoomButton* currRoom = getRoomButton(1);
+    currRoom->updateCastMess(mapData);
     QLabel *lblDelRoom = new QLabel(mapData["textMess"].toString() + " ");
     // помещаем QLabel в mainToolBar
     ui->mainToolBar->addWidget(lblDelRoom);
@@ -334,26 +378,13 @@ void MainWindow::showCast(QVariantMap mapData)
     qDebug() << "showCast";
     int roomID = mapData["roomID"].toInt();
     RoomButton* currRoom = getRoomButton(roomID);
-//    QListIterator<RoomButton*> iRoom(listRoomButton);
-//    RoomButton* currRoom = roomActiv;
-    QList<QVariantMap> castList;
-//    while (iRoom.hasNext()){
-//        currRoom = iRoom.next();
-//        if (currRoom->getRoomID() == roomID ) {
-            castList = currRoom->getListCastMess();
-            castList.append(mapData);
-//            break;
-//        }
-//    }
-    currRoom->setListCastMess(castList);
+    currRoom->updateCastMess(mapData);
     if (currRoom != roomActiv){
         currRoom->setStyleSheet("font: 14px; color: white; background-color: green");
     }
     else{
         emit roomActiv->clicked();
-        //upgradeMessage();
     }
-    //qDebug() << "232" << currRoom->getListCastMess();
 }
 
 void MainWindow::upgradeRoomsAdmin(QVariantMap mapNewRoom)
@@ -361,14 +392,9 @@ void MainWindow::upgradeRoomsAdmin(QVariantMap mapNewRoom)
     QVariantMap nullMapMess;
     QVariantMap nullMapUsers;
     // создаем кнопку-комнату
-    RoomButton *btnRoom = new RoomButton(mapNewRoom["newRoomID"].toInt(), "admin",
-                                         mapNewRoom["newRoomName"].toString(),
-                                         nullMapMess, nullMapUsers);
-    // клик по комнате - показываем сообщения комнаты
-    connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
-    listRoomButton.append(btnRoom);
-    ui->vltListRooms->addWidget(btnRoom);
-    ui->vltListRooms->update();
+    addNewRoomToList(mapNewRoom["newRoomID"].toInt(), "admin",
+                     mapNewRoom["newRoomName"].toString(),
+                     nullMapMess, nullMapUsers);
 }
 
 void MainWindow::upgradeRoomsUser(QVariantMap mapNewRoom)
@@ -376,56 +402,21 @@ void MainWindow::upgradeRoomsUser(QVariantMap mapNewRoom)
     RoomButton *temp = getRoomButton(mapNewRoom["roomID"].toInt());
     if (temp){
         // создаем кнопку-комнату
-        RoomButton *btnRoom = new RoomButton(mapNewRoom["roomID"].toInt(), "user",
-                                             mapNewRoom["roomName"].toString(),
-                                             mapNewRoom["mess"].toMap(),
-                                             mapNewRoom["members"].toMap());
-
-        // клик по комнате - показываем сообщения комнаты
-        connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
-        listRoomButton.append(btnRoom);
-        ui->vltListRooms->addWidget(btnRoom);
-        ui->vltListRooms->update();
+        addNewRoomToList(mapNewRoom["roomID"].toInt(), "user",
+                         mapNewRoom["roomName"].toString(),
+                         mapNewRoom["mess"].toMap(), mapNewRoom["members"].toMap());
     }
 }
 
 void MainWindow::delRoom(int delRoomID)
 {
-//    QMutableListIterator<RoomButton*> iRoom(listRoomButton);
-    RoomButton* currRoom;
+   // RoomButton* currRoom;
     // находим комнату с id = 1 и делаем активной
-//    while (iRoom.hasNext()){
-//        currRoom = iRoom.next();
-//        if (currRoom->getRoomID() == 1){
-//            roomActiv = currRoom;
-//            //this->roomActiv->setStyleSheet("font: 14px; color: white; background-color: blue");
-//            break;
-//        }
-//    }
     roomActiv = getRoomButton(1);
     // находим комнату с id = delRoomID и удаляем ее
-    QMutableListIterator<RoomButton*> iRoom(listRoomButton);
-    iRoom.toFront();
-    while (iRoom.hasNext()){
-        currRoom = iRoom.next();
-        if (currRoom->getRoomID() == delRoomID) {
-            ui->vltListRooms->removeWidget(currRoom);
-            ui->vltListRooms->update();
-           // qDebug() << "listRoomButton" << listRoomButton;
-            iRoom.remove();
-            delete currRoom;
-           // qDebug() << "listRoomButton" << listRoomButton;
-            break;
-        }
-    }
+    delRoomFromList(delRoomID);
 
-    iRoom.toFront();
-    while (iRoom.hasNext()){
-        currRoom = iRoom.next();
-        if (currRoom->getRoomID() != 1){
-            currRoom->setStyleSheet("font: 14px; color: black; background-color: gray");
-        }
-    }
+    paintAllRoomExceptOne(1, "gray");
 }
 
 void MainWindow::showMessToTextEdit(QVariantMap mapMessID)
@@ -454,8 +445,6 @@ void MainWindow::showNotifyInvite(QVariantMap mapInvitations)
         NotifyButton* btnInvite = new NotifyButton(ui->cbxNotify->currentIndex(),
                                                    mapInvite, sID.toInt());
         listNotifyButton.append(btnInvite);
-        //qDebug() << "listNotifyButton" << listNotifyButton;
-
      }
 
 }
@@ -474,18 +463,13 @@ void MainWindow::showAcceptInvite()
     QMessageBox quest(QMessageBox::Question,"Question",sParam);
     quest.setStandardButtons(QMessageBox::Yes| QMessageBox::No);
     r=quest.exec();
-    //qDebug() << "r= " << r;
     if(r == QMessageBox::Yes) {
-        //qDebug() << "459 accept invite";
-        ui->cbxNotify->removeItem(inviteActiv->getIndex());
         client->prepareQueryAcceptInvite(inviteActiv->getInviteID(),
                                          inviteActiv->getMap()["roomID"].toInt(),
                                          inviteActiv->getMap()["roomName"].toString());
 
     }
     else {
-        //qDebug() << "465 reject invite";
-        ui->cbxNotify->removeItem(inviteActiv->getIndex());
         client->prepareQueryRejectInvite(inviteActiv->getInviteID(),
                                          roomID, roomName,senderID,senderName);
 
@@ -494,22 +478,17 @@ void MainWindow::showAcceptInvite()
 
 void MainWindow::notifyUpgrade(int inviteID)
 {
-    QMutableListIterator<NotifyButton*> iNotify(listNotifyButton);
-    NotifyButton* currNotify;
-    while(iNotify.hasNext()){
-        currNotify = iNotify.next();
-        if (currNotify->getInviteID() == inviteID){
-            iNotify.remove();
-            ui->cbxNotify->removeItem(currNotify->getIndex());
-            delete currNotify;
-            break;
-        }
-    }
+    delInvite(inviteID);
     if (listNotifyButton.isEmpty()){
+        qDebug() << "listNotifyButton.isEmpty()";
         inviteActiv->setNull();
         ui->lblNotify->setStyleSheet("font: 14px; color: white; background-color: gray");
+    }
+    else {
+        qDebug() << listNotifyButton;
 
     }
+
 }
 
 void MainWindow::showDialogMembers(QVariantMap mapUsers, int roomID)
@@ -540,35 +519,13 @@ void MainWindow::showDialogMembers(QVariantMap mapUsers, int roomID)
 
 void MainWindow::changeUsersRoom(QVariantMap mapData)
 {
-    //qDebug() << "512 senderName" << mapData["senderName"].toString();
-    //qDebug() << "roomID" << mapData["roomID"].toInt();
     QVariantMap currentMapUsers;
-    //QListIterator<RoomButton*> iRoom(listRoomButton);
-    //RoomButton* currentRoom = roomActiv;
     RoomButton* currentRoom = getRoomButton(mapData["roomID"].toInt());
     setUpdateUsers updateParam = setUpdateUsers(mapData["updateParam"].toInt());
-//    while (iRoom.hasNext()) {
-//        currentRoom = iRoom.next();
-//        currentMapUsers = currentRoom->getMapUsers();
-//        if (currentRoom->getRoomID() == mapData["roomID"].toInt()){
-            if ( updateParam == setUpdateUsers::addUser){
-                currentMapUsers.insert(mapData["userID"].toString(),
-                                       mapData["senderName"].toString());
-            }
-            else {
-                if (updateParam == setUpdateUsers::delIsYou){
-                    currentMapUsers.clear();
-                    currentRoom->setStyleSheet("font: 14px; color: black; background-color: yellow");
-                }
-                else {
-                    currentMapUsers.remove(mapData["userID"].toString());
-                }
-            }
-            showCast(mapData);
-//            break;
-//        }
-//    }
-    currentRoom->setMapUsers(currentMapUsers);
+    currentRoom->updateMapUsers(mapData["userID"].toString(),
+                                mapData["senderName"].toString(),
+                                updateParam);
+    showCast(mapData);
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -592,14 +549,7 @@ void MainWindow::on_actionNewRoom_triggered()
 
 void MainWindow::on_actionAuth_triggered()
 {
-    QMutableListIterator<RoomButton*> iRoom(listRoomButton);
-    RoomButton* currRoom;
-    while (iRoom.hasNext()){
-        currRoom = iRoom.next();
-        ui->vltListRooms->removeWidget(currRoom);
-        iRoom.remove();
-       delete currRoom;
-    }
+    dellRoomList();
     ui->mainToolBar->clear();
     dialogAuth->authAgain=false;
     dialogAuth->flagExit = false;
@@ -663,8 +613,6 @@ void MainWindow::on_actionDelete_user_triggered()
 {
     if (roomActiv->getRole() == "admin"){
         showDialogMembers(roomActiv->getMapUsers(), roomActiv->getRoomID());
-        //client->prepareQueryDelUser(roomActiv->getRoomID());
-        //client->prepareQueryUserInRoom(roomActiv->getRoomID());
     }
     else{
         showWarning("Вы не администратор этой комнаты: " + roomActiv->getRoomName());
