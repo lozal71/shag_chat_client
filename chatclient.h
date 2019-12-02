@@ -6,6 +6,7 @@
 //#include "protocol_in.h"
 //#include "protocol_out.h"
 #include <QDateTime>
+#include <QCryptographicHash>
 
 
 enum setDisconnect {fromServer, fromClient, undefined};

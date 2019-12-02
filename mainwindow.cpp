@@ -105,7 +105,7 @@ void MainWindow::addNewRoomToList(int roomID, QString role, QString roomName,
 {
     // создаем кнопку-комнату
     RoomButton *btnRoom = new RoomButton(roomID, role, roomName,
-                                         mapMess, mapUsers);
+                                         mapMess, mapUsers, ui->wtRoom);
     // клик по комнате - показываем сообщения комнаты
     connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
     listRoomButton.append(btnRoom);

@@ -2,7 +2,8 @@
 
 RoomButton::RoomButton(int ID,
                        QString role, QString sName,
-                       QVariantMap mapMess, QVariantMap mapUsers)
+                       QVariantMap mapMess, QVariantMap mapUsers, QWidget *parent):
+    QPushButton(parent)
 {
     room.id = ID;
     room.role = role;

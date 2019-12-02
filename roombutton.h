@@ -13,7 +13,7 @@ class RoomButton: public QPushButton
     Q_OBJECT
 public:
     //explicit RoomButton(QWidget *parent = nullptr);
-    RoomButton(int ID, QString role, QString sName, QVariantMap mapMess, QVariantMap mapUsers);
+    RoomButton(int ID, QString role, QString sName, QVariantMap mapMess, QVariantMap mapUsers, QWidget *parent = nullptr);
     int getRoomID();
     QString getRole();
     QString getRoomName();
