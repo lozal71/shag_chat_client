@@ -20,7 +20,7 @@ CONFIG += c++17
 
 SOURCES += \
         chatclient.cpp \
-        clientui.cpp \
+        contextmenu.cpp \
         dialogauth.cpp \
         dialoginvite.cpp \
         main.cpp \
@@ -31,7 +31,7 @@ SOURCES += \
 
 HEADERS += \
         chatclient.h \
-        clientui.h \
+        contextmenu.h \
         dialogauth.h \
         dialoginvite.h \
         mainwindow.h \
@@ -40,7 +40,6 @@ HEADERS += \
         roombutton.h
 
 FORMS += \
-        clientui.ui \
         dialogauth.ui \
         dialoginvite.ui \
         mainwindow.ui

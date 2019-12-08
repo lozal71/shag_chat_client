@@ -11,9 +11,12 @@ MainWindow::MainWindow(QWidget *parent)
     invite = new DialogInvite();
     lblWarning = new QLabel();
     inviteActiv = new NotifyButton();
+    //cMenu = new ContextMenu();
     connectClientUI();
 
-    pall.setColor(this->backgroundRole(),Qt::gray);
+    pall.setColor(QPalette::Text,Qt::gray);
+    pall.setBrush(QPalette::Button, QBrush(Qt::red,Qt::Dense3Pattern));
+    pall.setColor(QPalette::ButtonText, Qt::blue);
     this->setPalette(pall);
 
 
@@ -22,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionAuth->setEnabled(false);
     ui->leWriteMes->setEnabled(false);
     flagActionQuit = false;
-    ui->vltNotify->addWidget(inviteActiv);
+    ui->vtlNotify->addWidget(inviteActiv);
 }
 
 MainWindow::~MainWindow()
@@ -35,6 +38,7 @@ MainWindow::~MainWindow()
     delete dialogAuth;
     delete client;
     delete ui;
+    //delete cMenu;
 }
 
 chatClient* MainWindow::getClient()
@@ -111,6 +115,9 @@ void MainWindow::addNewRoomToList(int roomID, QString role, QString roomName,
     listRoomButton.append(btnRoom);
     ui->vltListRooms->addWidget(btnRoom);
     ui->vltListRooms->update();
+    if (roomID == 1){
+        this->roomActiv = btnRoom;
+    }
 }
 
 void MainWindow::delInvite(int inviteID)
@@ -157,6 +164,38 @@ void MainWindow::resetNotifyButton(int indexInvite)
     }
 }
 
+void MainWindow::slotCustomMenuRequested(QPoint pos)
+{
+    QMenu *mnu = new QMenu(roomActiv);
+    QAction *actDelRoom = mnu->addAction("del room");
+    QAction *actAddRoom = mnu->addAction("add room");
+
+    connect(actDelRoom, SIGNAL(triggered()),
+                            this, SLOT(slotDelRoom()));
+    connect(actAddRoom, SIGNAL(triggered()),
+                            this, SLOT(slotAddRoom()));
+    mnu->exec(roomActiv->mapToGlobal(pos));
+    if (!mnu) delete mnu;
+}
+
+
+void MainWindow::slotDelRoom()
+{
+    client->prepareQueryDelRoom(roomActiv->getRoomID());
+}
+
+void MainWindow::slotAddRoom()
+{
+    bool ok;
+    QString roomName = QInputDialog::getText(this,"Новая комната",
+                                             "Имя комнаты",
+                                             QLineEdit::Normal, "Введите имя комнаты...", &ok);
+    if (ok && !roomName.isEmpty()){
+        emit dataNewRoomCollected(roomName);
+        //qDebug() << "roomName" << roomName;
+    }
+}
+
 void MainWindow::connectClientUI()
 {
     // данные для Авторизации собраны - клиент готовит запрос на Авторизацию
@@ -179,7 +218,7 @@ void MainWindow::connectClientUI()
 
     // клик по кнопке-Send - собираем данные для отправки сообщения
     connect(ui->pbSend, &QPushButton::clicked,
-            this, &MainWindow::collectDataSend);
+            this, &MainWindow::collectDataSend);    
     connect(ui->leWriteMes, &QLineEdit::returnPressed,
             this, &MainWindow::collectDataSend);
 
@@ -287,21 +326,10 @@ void MainWindow::showRoomsUserName(QVariantMap mapRoomsID)
     for (const QString& sRoomID: mapRoomsID.keys()){
         QVariantMap mapRooms = mapRoomsID[sRoomID].toMap();
         // создаем кнопку-комнату
-        RoomButton *btnRoom = new RoomButton(mapRooms["roomID"].toInt(),
-                                             mapRooms["role"].toString(),
-                                             mapRooms["roomName"].toString(),
-                                             mapRooms["mess"].toMap(),
-                                             mapRooms["members"].toMap());
-        // клик по комнате - показ сообщения комнаты
-        connect (btnRoom, &RoomButton::clicked, this, &MainWindow::showMessage);
-        // собираем список кнопок-комнат
-        listRoomButton.append(btnRoom);
-        // добавляем виджет на вертикальный слой
-        ui->vltListRooms->addWidget(btnRoom);
-        // комнату с ID = 1 (default) назначаем активной
-        if (btnRoom->getRoomID() == 1){
-            this->roomActiv = btnRoom;
-        }
+        addNewRoomToList(mapRooms["roomID"].toInt(), mapRooms["role"].toString(),
+                         mapRooms["roomName"].toString(),
+                         mapRooms["mess"].toMap(),
+                        mapRooms["members"].toMap());
     }
 }
 
@@ -313,6 +341,8 @@ void MainWindow::showMessage()
     ui->teChat->clear();
     // определяем, какая кнопка нажата и назначаем ее активной
     this->roomActiv = static_cast<RoomButton*>(sender());
+    connect(roomActiv, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(slotCustomMenuRequested(QPoint)));
     // определяем сообщения в активной комнате
     QVariantMap mapAllMess = roomActiv->getMapMess();
     // выделяем цветом активную комнату
@@ -357,8 +387,7 @@ void MainWindow::showMessage()
             currRoom->setStyleSheet("font: 14px; color: black; background-color: gray");
 
         }
-    }
-
+    }   
 }
 
 void MainWindow::showCastDelRoom(QVariantMap mapData)
@@ -413,10 +442,11 @@ void MainWindow::delRoom(int delRoomID)
    // RoomButton* currRoom;
     // находим комнату с id = 1 и делаем активной
     roomActiv = getRoomButton(1);
+    qDebug() << "roomActiv->getRoomID()" << roomActiv->getRoomID() ;
     // находим комнату с id = delRoomID и удаляем ее
     delRoomFromList(delRoomID);
-
-    paintAllRoomExceptOne(1, "gray");
+    paintOneRoom(1, "blue");
+    //paintAllRoomExceptOne(1, "gray");
 }
 
 void MainWindow::showMessToTextEdit(QVariantMap mapMessID)

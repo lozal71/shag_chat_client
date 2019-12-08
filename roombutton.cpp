@@ -12,7 +12,18 @@ RoomButton::RoomButton(int ID,
     room.mapUsers = mapUsers;
     setText(sName + " " + role);
     room.listCastMess.clear();
+    this->setMinimumHeight(100);
     setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+//    this->setContextMenuPolicy(Qt::ActionsContextMenu);
+//    QAction *actDelRoom = new QAction(QObject::tr("del room"), this);
+//    QAction *actAddRoom = new QAction(QObject::tr("add room"), this);
+//    this->addAction(actDelRoom);
+//    this->addAction(actAddRoom);
+//    connect(actDelRoom, SIGNAL(triggered()),
+//                            this, SLOT(slotDelRoom()));
+//    connect(actAddRoom, SIGNAL(triggered()),
+//                            this, SLOT(slotAddRoom()));
 }
 
 

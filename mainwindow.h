@@ -10,7 +10,8 @@
 #include "dialoginvite.h"
 #include "notifybutton.h"
 #include <QtWidgets>
-
+#include "contextmenu.h"
+#include <QAction>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {class MainWindow;}
@@ -25,13 +26,16 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     chatClient* getClient();
-
     DialogAuth *dialogAuth;
     DialogInvite *invite;
     QLabel *lblWarning;
+    QMenu  *cMenu;
    // QLabel *lblUserName;
 public slots:
     void resetNotifyButton(int indexInvite);
+    void slotCustomMenuRequested(QPoint pos);
+    void slotDelRoom();
+    void slotAddRoom();
 private:
     Ui::MainWindow *ui;
     QPalette pall;

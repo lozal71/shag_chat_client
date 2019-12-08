@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QList>
 #include <QScrollArea>
+//#include <QAction>
 
 enum setUpdateUsers {addUser, removeUser, delIsYou};
 
@@ -28,7 +29,6 @@ public:
     void updateCastMess(QVariantMap mapMess);
     void updateMapUsers(QString userID, QString senderName, setUpdateUsers param);
 private:
-
     struct roomData {
         int id;
         QString role;
